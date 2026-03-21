@@ -34,11 +34,14 @@ def watcher_tick(cfg: Config, db: DB, gcp, chain: ChainBackend):
         # Skip if already ready/failed (only provision if None or Locked-but-no-instance)
         ps = bot.get("provisioning_status", 0)
         if ps >= 2:
+            log.debug(f"Skipping {bot['owner'][:20]}: ps={ps} (ready/failed)")
             continue  # Ready or Failed — nothing to do
         wallet = bot["owner"]
         existing = db.get_instance_by_wallet(wallet)
         if existing and existing["status"] in ("provisioning", "running"):
+            log.debug(f"Skipping {wallet[:20]}: already {existing['status']} in DB")
             continue
+        log.info(f"Will provision {wallet[:20]}... (ps={ps}, no DB instance)")
 
         if active_count >= cfg.max_instances:
             log.info(f"At capacity ({active_count}/{cfg.max_instances}), skipping {wallet}")
