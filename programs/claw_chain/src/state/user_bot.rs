@@ -20,4 +20,6 @@ pub struct UserBot {
     pub total_billed: u64,
     /// PDA bump seed.
     pub bump: u8,
+    /// Provisioning status: 0=None, 1=Locked, 2=Ready, 3=Failed.
+    pub provisioning_status: u8,
 }

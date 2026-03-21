@@ -44,10 +44,12 @@ pub fn handle_deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
         user_bot.total_deposited = 0;
         user_bot.total_billed = 0;
         user_bot.bump = ctx.bumps.user_bot;
+        user_bot.provisioning_status = 0; // None
     } else {
         // Reactivation on top-up
         if !user_bot.is_active {
             user_bot.is_active = true;
+            user_bot.provisioning_status = 0; // Reset on reactivation
         }
     }
 

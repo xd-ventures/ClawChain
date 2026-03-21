@@ -18,5 +18,6 @@ pub struct Deactivate<'info> {
 pub fn handle_deactivate(ctx: Context<Deactivate>) -> Result<()> {
     require!(ctx.accounts.user_bot.is_active, ClawChainError::AlreadyInactive);
     ctx.accounts.user_bot.is_active = false;
+    ctx.accounts.user_bot.provisioning_status = 0; // Reset
     Ok(())
 }

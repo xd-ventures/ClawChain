@@ -3,7 +3,7 @@ use crate::error::ClawChainError;
 use crate::state::{OperatorConfig, UserBot};
 
 #[derive(Accounts)]
-pub struct SetBotHandle<'info> {
+pub struct LockForProvisioning<'info> {
     #[account(
         mut,
         seeds = [b"user_bot", user_bot.owner.as_ref()],
@@ -21,11 +21,10 @@ pub struct SetBotHandle<'info> {
     pub authority: Signer<'info>,
 }
 
-pub fn handle_set_bot_handle(ctx: Context<SetBotHandle>, bot_handle: String) -> Result<()> {
-    require!(bot_handle.len() <= 32, ClawChainError::BotHandleTooLong);
-    require!(ctx.accounts.user_bot.is_active, ClawChainError::BotNotActive);
-
-    ctx.accounts.user_bot.bot_handle = bot_handle;
-    ctx.accounts.user_bot.provisioning_status = 2; // Ready
+pub fn handle_lock_for_provisioning(ctx: Context<LockForProvisioning>) -> Result<()> {
+    let user_bot = &mut ctx.accounts.user_bot;
+    require!(user_bot.is_active, ClawChainError::BotNotActive);
+    require!(user_bot.provisioning_status == 0, ClawChainError::AlreadyLocked);
+    user_bot.provisioning_status = 1; // Locked
     Ok(())
 }

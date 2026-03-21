@@ -31,6 +31,11 @@ def get_user_bot_pda(owner: Pubkey) -> Pubkey:
     return pda
 
 
+def get_service_status_pda() -> Pubkey:
+    pda, _ = Pubkey.find_program_address([b"service_status"], get_program_id())
+    return pda
+
+
 def deserialize_operator_config(data: bytes) -> dict:
     offset = 8  # skip discriminator
     authority = Pubkey.from_bytes(data[offset : offset + 32])
@@ -70,6 +75,8 @@ def deserialize_user_bot(data: bytes) -> dict:
     total_billed = struct.unpack_from("<Q", data, offset)[0]
     offset += 8
     bump = data[offset]
+    offset += 1
+    provisioning_status = data[offset] if offset < len(data) else 0
     return {
         "owner": str(owner),
         "bot_handle": bot_handle,
@@ -79,6 +86,7 @@ def deserialize_user_bot(data: bytes) -> dict:
         "total_deposited": total_deposited,
         "total_billed": total_billed,
         "bump": bump,
+        "provisioning_status": provisioning_status,
     }
 
 
@@ -98,7 +106,7 @@ def fetch_all_user_bots(client: Client) -> list[dict]:
     if not resp.value:
         return []
 
-    rent_resp = client.get_minimum_balance_for_rent_exemption(110)  # UserBot data size
+    rent_resp = client.get_minimum_balance_for_rent_exemption(111)  # UserBot data size (8 disc + 103 data)
     rent_exempt = rent_resp.value
 
     results = []

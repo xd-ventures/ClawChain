@@ -20,7 +20,7 @@ from solana.rpc.api import Client
 from solana.rpc.types import MemcmpOpts
 
 # Program ID — update after deploying to devnet/mainnet
-PROGRAM_ID = Pubkey.from_string("5jKteEpinwgQaHbAZBdYRCqAEbHcS9UnL6zDw7pJYaYd")
+PROGRAM_ID = Pubkey.from_string("C1nMit7QsTGXDxb3p5EdNGDjRLQE1yDPtebSo1DA3ejX")
 
 CLUSTER_URLS = {
     "devnet": "https://api.devnet.solana.com",
@@ -81,6 +81,9 @@ def deserialize_user_bot(data: bytes) -> dict:
     total_billed = struct.unpack_from("<Q", data, offset)[0]
     offset += 8
     bump = data[offset]
+    offset += 1
+    provisioning_status = data[offset] if offset < len(data) else 0
+    status_names = {0: "None", 1: "Locked", 2: "Ready", 3: "Failed"}
     return {
         "owner": str(owner),
         "bot_handle": bot_handle if bot_handle else "(pending provisioning)",
@@ -90,6 +93,7 @@ def deserialize_user_bot(data: bytes) -> dict:
         "total_deposited": total_deposited,
         "total_billed": total_billed,
         "bump": bump,
+        "provisioning_status": status_names.get(provisioning_status, f"Unknown({provisioning_status})"),
     }
 
 

@@ -23,27 +23,33 @@ class ChainBackend(ABC):
 
     @abstractmethod
     def fetch_operator_config(self) -> dict:
-        """Return operator config: authority, treasury, billing_amount, min_deposit."""
         ...
 
     @abstractmethod
     def fetch_all_user_bots(self) -> list[dict]:
-        """Return all UserBot accounts.
-
-        Each dict has: owner, bot_handle, is_active, created_at,
-        last_billed_at, total_deposited, total_billed, pda,
-        lamports, available_balance.
-        """
         ...
 
     @abstractmethod
     def set_bot_handle(self, user_wallet_pubkey: str, bot_handle: str) -> str:
-        """Write bot handle on-chain for a user. Returns tx signature or mock ID."""
         ...
 
     @abstractmethod
     def bill(self, user_wallet_pubkey: str) -> str:
-        """Bill a user. Returns tx signature or mock ID."""
+        ...
+
+    @abstractmethod
+    def lock_for_provisioning(self, user_wallet_pubkey: str) -> str:
+        """Lock funds on-chain while provisioning VM. Returns tx sig."""
+        ...
+
+    @abstractmethod
+    def refund_failed_provision(self, user_wallet_pubkey: str) -> str:
+        """Deactivate + mark Failed after VM provisioning failure. Returns tx sig."""
+        ...
+
+    @abstractmethod
+    def update_service_status(self, active_instances: int, accepting_new: bool) -> str:
+        """Update on-chain capacity status. Returns tx sig."""
         ...
 
 
@@ -60,8 +66,13 @@ class SolanaBackend(ChainBackend):
             fetch_operator_config as _fetch_config,
             fetch_all_user_bots as _fetch_bots,
             get_operator_config_pda,
+            get_service_status_pda,
         )
-        from .solana_tx import send_set_bot_handle, send_bill
+        from .solana_tx import (
+            send_set_bot_handle, send_bill,
+            send_lock_for_provisioning, send_refund_failed_provision,
+            send_update_service_status,
+        )
 
         self._client = Client(rpc_url)
         self._keypair = operator_keypair
@@ -69,7 +80,11 @@ class SolanaBackend(ChainBackend):
         self._fetch_bots = _fetch_bots
         self._send_set_bot_handle = send_set_bot_handle
         self._send_bill = send_bill
+        self._send_lock = send_lock_for_provisioning
+        self._send_refund = send_refund_failed_provision
+        self._send_update_status = send_update_service_status
         self._operator_config_pda = get_operator_config_pda()
+        self._service_status_pda = get_service_status_pda()
         self._operator_config: dict | None = None
 
     def fetch_operator_config(self) -> dict:
@@ -91,40 +106,31 @@ class SolanaBackend(ChainBackend):
             self._operator_config_pda, self._operator_config,
         )
 
+    def lock_for_provisioning(self, user_wallet_pubkey: str) -> str:
+        return self._send_lock(
+            self._client, self._keypair, user_wallet_pubkey,
+            self._operator_config_pda,
+        )
+
+    def refund_failed_provision(self, user_wallet_pubkey: str) -> str:
+        return self._send_refund(
+            self._client, self._keypair, user_wallet_pubkey,
+            self._operator_config_pda,
+        )
+
+    def update_service_status(self, active_instances: int, accepting_new: bool) -> str:
+        return self._send_update_status(
+            self._client, self._keypair, active_instances, accepting_new,
+            self._operator_config_pda, self._service_status_pda,
+        )
+
 
 # ---------------------------------------------------------------------------
 # Mock YAML-file backend
 # ---------------------------------------------------------------------------
 
 class MockBackend(ChainBackend):
-    """Mock backend that reads/writes state from a YAML file.
-
-    The YAML file format:
-
-        operator_config:
-          authority: "SomeBase58Pubkey"
-          treasury: "SomeBase58Pubkey"
-          billing_amount: 10000000      # lamports
-          min_deposit: 50000000
-
-        user_bots:
-          - owner: "WalletPubkey1"
-            bot_handle: ""              # empty = needs provisioning
-            is_active: true
-            total_deposited: 100000000
-            total_billed: 0
-            available_balance: 100000000
-
-          - owner: "WalletPubkey2"
-            bot_handle: "@some_bot"
-            is_active: false            # deactivated
-            total_deposited: 50000000
-            total_billed: 30000000
-            available_balance: 20000000
-
-    Fields not specified get sensible defaults. The file is rewritten
-    on every set_bot_handle / bill call so you can watch state evolve.
-    """
+    """Mock backend that reads/writes state from a YAML file."""
 
     def __init__(self, state_file: str):
         self._path = Path(state_file)
@@ -146,7 +152,6 @@ class MockBackend(ChainBackend):
         return f"mock-tx-{self._tx_counter}"
 
     def reload(self):
-        """Re-read the YAML file. Useful for external edits between loop ticks."""
         self._state = self._load()
 
     def fetch_operator_config(self) -> dict:
@@ -160,7 +165,7 @@ class MockBackend(ChainBackend):
         }
 
     def fetch_all_user_bots(self) -> list[dict]:
-        self.reload()  # re-read file each poll so you can edit it live
+        self.reload()
         now = int(time.time())
         results = []
         for entry in self._state.get("user_bots", []):
@@ -168,6 +173,7 @@ class MockBackend(ChainBackend):
                 "owner": entry["owner"],
                 "bot_handle": entry.get("bot_handle", ""),
                 "is_active": entry.get("is_active", True),
+                "provisioning_status": entry.get("provisioning_status", 0),
                 "created_at": entry.get("created_at", now),
                 "last_billed_at": entry.get("last_billed_at", now),
                 "total_deposited": entry.get("total_deposited", 100_000_000),
@@ -183,6 +189,7 @@ class MockBackend(ChainBackend):
         for entry in self._state.get("user_bots", []):
             if entry["owner"] == user_wallet_pubkey:
                 entry["bot_handle"] = bot_handle
+                entry["provisioning_status"] = 2  # Ready
                 break
         self._save()
         tx = self._next_tx()
@@ -198,7 +205,7 @@ class MockBackend(ChainBackend):
                 balance = entry.get("available_balance", 0)
                 if balance < billing_amount:
                     entry["is_active"] = False
-                    log.info(f"[MOCK] bill auto-deactivated {user_wallet_pubkey} (balance {balance} < {billing_amount})")
+                    log.info(f"[MOCK] bill auto-deactivated {user_wallet_pubkey}")
                 else:
                     entry["available_balance"] = balance - billing_amount
                     entry["total_billed"] = entry.get("total_billed", 0) + billing_amount
@@ -207,4 +214,34 @@ class MockBackend(ChainBackend):
         self._save()
         tx = self._next_tx()
         log.info(f"[MOCK] bill({user_wallet_pubkey}) -> {tx}")
+        return tx
+
+    def lock_for_provisioning(self, user_wallet_pubkey: str) -> str:
+        for entry in self._state.get("user_bots", []):
+            if entry["owner"] == user_wallet_pubkey:
+                entry["provisioning_status"] = 1  # Locked
+                break
+        self._save()
+        tx = self._next_tx()
+        log.info(f"[MOCK] lock_for_provisioning({user_wallet_pubkey}) -> {tx}")
+        return tx
+
+    def refund_failed_provision(self, user_wallet_pubkey: str) -> str:
+        for entry in self._state.get("user_bots", []):
+            if entry["owner"] == user_wallet_pubkey:
+                entry["is_active"] = False
+                entry["provisioning_status"] = 3  # Failed
+                break
+        self._save()
+        tx = self._next_tx()
+        log.info(f"[MOCK] refund_failed_provision({user_wallet_pubkey}) -> {tx}")
+        return tx
+
+    def update_service_status(self, active_instances: int, accepting_new: bool) -> str:
+        self._state.setdefault("service_status", {})
+        self._state["service_status"]["active_instances"] = active_instances
+        self._state["service_status"]["accepting_new"] = accepting_new
+        self._save()
+        tx = self._next_tx()
+        log.info(f"[MOCK] update_service_status(active={active_instances}, accepting={accepting_new}) -> {tx}")
         return tx

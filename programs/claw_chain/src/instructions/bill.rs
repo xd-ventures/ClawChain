@@ -31,6 +31,7 @@ pub fn handle_bill(ctx: Context<Bill>) -> Result<()> {
     let config = &ctx.accounts.operator_config;
 
     require!(user_bot.is_active, ClawChainError::BotNotActive);
+    require!(user_bot.provisioning_status == 2, ClawChainError::BotNotReady);
 
     let rent = Rent::get()?;
     let min_balance = rent.minimum_balance(user_bot.to_account_info().data_len());

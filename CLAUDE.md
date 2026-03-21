@@ -57,14 +57,15 @@ python read_accounts.py --cluster localnet  # use localnet instead of devnet
 
 ## On-Chain Data Model
 
-Two PDA account types, both owned by the program:
+Three PDA account types, all owned by the program:
 
 - **OperatorConfig** (`seeds = [b"operator_config"]`) — singleton storing authority, treasury, billing_amount, min_deposit
-- **UserBot** (`seeds = [b"user_bot", user_wallet]`) — one per user; stores owner, bot_handle, is_active flag, timestamps, totals
+- **UserBot** (`seeds = [b"user_bot", user_wallet]`) — one per user; stores owner, bot_handle, is_active flag, provisioning_status (0=None/1=Locked/2=Ready/3=Failed), timestamps, totals
+- **ServiceStatus** (`seeds = [b"service_status"]`) — singleton storing active_instances, max_instances, accepting_new (written by orchestrator)
 
 The user's available SOL balance is the PDA's lamport balance minus rent-exempt minimum — no separate balance field.
 
-Six instructions: `initialize`, `deposit` (init_if_needed), `set_bot_handle`, `deactivate`, `bill` (auto-deactivates on insufficient funds), `withdraw_remaining`.
+Ten instructions: `initialize`, `deposit` (init_if_needed), `set_bot_handle` (also sets provisioning_status=Ready), `deactivate`, `bill` (requires provisioning_status=Ready, auto-deactivates on insufficient funds), `withdraw_remaining`, `lock_for_provisioning`, `refund_failed_provision`, `initialize_service_status`, `update_service_status`.
 
 ## Commit Workflow
 
@@ -121,3 +122,11 @@ The orchestrator uses a `ChainBackend` abstraction (chain.py) with two implement
 ### ADR-008: SNS domain deferred to mainnet (2026-03-21)
 
 Solana Name Service (SNS/.sol domains) only exist on mainnet. Registration of clawchain.sol deferred until mainnet launch. No code changes needed — the on-chain data model already supports the future web GUI without modification.
+
+### ADR-009: Capacity management with on-chain ServiceStatus (2026-03-21)
+
+Added `MAX_INSTANCES` config to limit concurrent VMs. Orchestrator startup validates `max_instances <= bot pool size`. A new `ServiceStatus` PDA (separate from OperatorConfig to avoid reallocation) stores `active_instances`, `max_instances`, `accepting_new` on-chain for external visibility (future GUI). The orchestrator writes this every poll cycle via `update_service_status`. When at capacity, new deposits are not provisioned — funds sit until a slot opens.
+
+### ADR-010: Escrow-like provisioning guarantee (2026-03-21)
+
+Added `provisioning_status` field to UserBot (0=None, 1=Locked, 2=Ready, 3=Failed). Orchestrator calls `lock_for_provisioning` before creating a VM (prevents withdrawal during provisioning). If VM fails to start within ~5 min, `refund_failed_provision` deactivates the account (user can withdraw). `bill` instruction now requires `provisioning_status == 2` (Ready) — no billing until VM is confirmed healthy and bot handle is set. This is not true escrow (no 3rd party), but guarantees users are never charged for a service they didn't receive.

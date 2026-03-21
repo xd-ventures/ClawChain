@@ -12,13 +12,16 @@ from solders.message import Message
 from solana.rpc.api import Client
 
 from .config import get_program_id
-from .solana_rpc import get_operator_config_pda, get_user_bot_pda
+from .solana_rpc import get_operator_config_pda, get_user_bot_pda, get_service_status_pda
 
 log = logging.getLogger("orchestrator.tx")
 
 # Instruction discriminators from IDL
 SET_BOT_HANDLE_DISC = bytes([17, 239, 28, 140, 79, 144, 39, 237])
 BILL_DISC = bytes([37, 50, 141, 86, 97, 228, 217, 79])
+LOCK_FOR_PROVISIONING_DISC = bytes([72, 17, 235, 96, 180, 239, 248, 228])
+REFUND_FAILED_PROVISION_DISC = bytes([171, 183, 144, 121, 163, 240, 11, 131])
+UPDATE_SERVICE_STATUS_DISC = bytes([19, 100, 225, 205, 54, 74, 242, 60])
 
 
 def _build_set_bot_handle_ix(
@@ -125,4 +128,56 @@ def send_bill(
         operator_config_pda=operator_config_pda,
         treasury=treasury,
     )
+    return _send_and_confirm(client, ix, operator_keypair)
+
+
+def send_lock_for_provisioning(
+    client: Client,
+    operator_keypair: Keypair,
+    user_wallet_pubkey: str,
+    operator_config_pda: Pubkey,
+) -> str:
+    owner = Pubkey.from_string(user_wallet_pubkey)
+    user_bot_pda = get_user_bot_pda(owner)
+    accounts = [
+        AccountMeta(pubkey=user_bot_pda, is_signer=False, is_writable=True),
+        AccountMeta(pubkey=operator_config_pda, is_signer=False, is_writable=False),
+        AccountMeta(pubkey=operator_keypair.pubkey(), is_signer=True, is_writable=False),
+    ]
+    ix = Instruction(program_id=get_program_id(), data=LOCK_FOR_PROVISIONING_DISC, accounts=accounts)
+    return _send_and_confirm(client, ix, operator_keypair)
+
+
+def send_refund_failed_provision(
+    client: Client,
+    operator_keypair: Keypair,
+    user_wallet_pubkey: str,
+    operator_config_pda: Pubkey,
+) -> str:
+    owner = Pubkey.from_string(user_wallet_pubkey)
+    user_bot_pda = get_user_bot_pda(owner)
+    accounts = [
+        AccountMeta(pubkey=user_bot_pda, is_signer=False, is_writable=True),
+        AccountMeta(pubkey=operator_config_pda, is_signer=False, is_writable=False),
+        AccountMeta(pubkey=operator_keypair.pubkey(), is_signer=True, is_writable=False),
+    ]
+    ix = Instruction(program_id=get_program_id(), data=REFUND_FAILED_PROVISION_DISC, accounts=accounts)
+    return _send_and_confirm(client, ix, operator_keypair)
+
+
+def send_update_service_status(
+    client: Client,
+    operator_keypair: Keypair,
+    active_instances: int,
+    accepting_new: bool,
+    operator_config_pda: Pubkey,
+    service_status_pda: Pubkey,
+) -> str:
+    data = UPDATE_SERVICE_STATUS_DISC + struct.pack("<H", active_instances) + bytes([1 if accepting_new else 0])
+    accounts = [
+        AccountMeta(pubkey=service_status_pda, is_signer=False, is_writable=True),
+        AccountMeta(pubkey=operator_config_pda, is_signer=False, is_writable=False),
+        AccountMeta(pubkey=operator_keypair.pubkey(), is_signer=True, is_writable=False),
+    ]
+    ix = Instruction(program_id=get_program_id(), data=data, accounts=accounts)
     return _send_and_confirm(client, ix, operator_keypair)

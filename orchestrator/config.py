@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 
 from dotenv import load_dotenv
 
-PROGRAM_ID_STR = "5jKteEpinwgQaHbAZBdYRCqAEbHcS9UnL6zDw7pJYaYd"
+PROGRAM_ID_STR = "C1nMit7QsTGXDxb3p5EdNGDjRLQE1yDPtebSo1DA3ejX"
 
 # Lazy import — solders/solana not needed in mock mode
 _PROGRAM_ID = None
@@ -38,6 +38,7 @@ class Config:
     sqlite_db_path: str
     poll_interval_secs: int
     billing_interval_secs: int
+    max_instances: int
     mock_state_file: str  # if set, use MockBackend instead of Solana RPC
 
     # Loaded at runtime (None in mock mode)
@@ -78,5 +79,6 @@ class Config:
             sqlite_db_path=os.environ.get("SQLITE_DB_PATH", "./orchestrator.db"),
             poll_interval_secs=int(os.environ.get("POLL_INTERVAL_SECS", "15")),
             billing_interval_secs=int(os.environ.get("BILLING_INTERVAL_SECS", "3600")),
+            max_instances=int(os.environ.get("MAX_INSTANCES", "10")),
             mock_state_file=mock_state_file,
         )

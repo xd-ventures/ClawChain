@@ -3,6 +3,7 @@
 
 import asyncio
 import logging
+import sys
 
 from .config import Config
 from .db import DB
@@ -17,8 +18,8 @@ logging.basicConfig(
 log = logging.getLogger("orchestrator")
 
 # Health check thresholds
-MAX_PROVISION_HEALTH_FAILURES = 20   # ~5 min at 15s polls — give up provisioning
-MAX_RUNNING_HEALTH_FAILURES = 10     # ~2.5 min — log critical alert (don't tear down, container may restart)
+MAX_PROVISION_HEALTH_FAILURES = 20   # ~5 min at 15s polls
+MAX_RUNNING_HEALTH_FAILURES = 10     # ~2.5 min
 
 
 async def watcher_loop(cfg: Config, db: DB, gcp, chain: ChainBackend):
@@ -28,13 +29,31 @@ async def watcher_loop(cfg: Config, db: DB, gcp, chain: ChainBackend):
             all_bots = chain.fetch_all_user_bots()
             on_chain = {b["owner"]: b for b in all_bots}
 
+            # --- CAPACITY CHECK ---
+            active_count = len(db.get_active_instances())
+            at_capacity = active_count >= cfg.max_instances
+
             # --- PROVISION NEW BOTS ---
             for bot in all_bots:
                 if not bot["is_active"] or bot["bot_handle"] != "":
                     continue
+                if bot.get("provisioning_status", 0) != 0:
+                    continue  # Already locked or in progress
                 wallet = bot["owner"]
                 existing = db.get_instance_by_wallet(wallet)
                 if existing and existing["status"] in ("provisioning", "running"):
+                    continue
+
+                if at_capacity:
+                    log.info(f"At capacity ({active_count}/{cfg.max_instances}), skipping {wallet}")
+                    continue
+
+                # Lock funds on-chain before provisioning
+                try:
+                    chain.lock_for_provisioning(wallet)
+                    log.info(f"Locked funds for provisioning: {wallet}")
+                except Exception as e:
+                    log.error(f"Failed to lock funds for {wallet}: {e}")
                     continue
 
                 alloc = db.allocate_bot(wallet)
@@ -54,11 +73,17 @@ async def watcher_loop(cfg: Config, db: DB, gcp, chain: ChainBackend):
                     except Exception as e:
                         log.error(f"Failed to create VM {vm_name}: {e}")
                         db.release_bot(tg_id)
+                        # Refund since VM creation failed
+                        try:
+                            chain.refund_failed_provision(wallet)
+                        except Exception as e2:
+                            log.error(f"Failed to refund {wallet} after VM creation failure: {e2}")
                         continue
                 else:
                     log.info(f"[DRY-RUN] Would create VM {vm_name}")
 
                 db.create_instance(wallet, tg_id, tg_name, vm_name, cfg.gcp_zone)
+                active_count += 1
 
             # --- CHECK PROVISIONING INSTANCES ---
             for inst in db.get_active_instances():
@@ -77,6 +102,8 @@ async def watcher_loop(cfg: Config, db: DB, gcp, chain: ChainBackend):
                 wallet = bot["owner"]
                 inst = db.get_instance_by_wallet(wallet)
                 if inst and inst["status"] == "stopped":
+                    if at_capacity:
+                        continue
                     alloc = db.allocate_bot(wallet)
                     if alloc is None:
                         log.error("No available telegram bots for reactivation!")
@@ -106,6 +133,14 @@ async def watcher_loop(cfg: Config, db: DB, gcp, chain: ChainBackend):
                 if chain_bot and not chain_bot["is_active"]:
                     _teardown_instance(db, gcp, inst)
 
+            # --- UPDATE ON-CHAIN SERVICE STATUS ---
+            try:
+                active_count = len(db.get_active_instances())
+                accepting = active_count < cfg.max_instances
+                chain.update_service_status(active_count, accepting)
+            except Exception as e:
+                log.warning(f"Failed to update service status on-chain: {e}")
+
         except Exception as e:
             log.exception(f"Watcher loop error: {e}")
 
@@ -118,24 +153,21 @@ def _handle_provisioning(cfg: Config, db: DB, gcp, chain: ChainBackend, inst: di
     vm_name = inst["vm_instance_name"]
 
     if not gcp:
-        # Mock mode: skip straight to running
         db.update_instance_ip(wallet, "10.0.0.1")
         db.update_instance_running(wallet)
         log.info(f"[DRY-RUN] VM {vm_name} is RUNNING")
         _try_set_bot_handle(chain, db, inst)
         return
 
-    # Check if VM is up yet
     if not inst["vm_ip"]:
         status = gcp.get_instance_status(vm_name)
         if status != "RUNNING":
-            return  # Still starting
+            return
         ip = gcp.get_instance_ip(vm_name) or ""
         db.update_instance_ip(wallet, ip)
         log.info(f"VM {vm_name} is RUNNING at {ip}, waiting for container health...")
-        return  # Wait for next poll to health check
+        return
 
-    # VM is up, has IP — check container health
     ip = inst["vm_ip"]
     if gcp.check_container_health(ip):
         db.update_instance_running(wallet)
@@ -146,12 +178,16 @@ def _handle_provisioning(cfg: Config, db: DB, gcp, chain: ChainBackend, inst: di
         log.warning(f"Health check failed for {vm_name} ({ip}), attempt {failures}/{MAX_PROVISION_HEALTH_FAILURES}")
 
         if failures >= MAX_PROVISION_HEALTH_FAILURES:
-            log.error(f"Container failed to start on {vm_name} after {failures} attempts — tearing down")
+            log.error(f"Container failed to start on {vm_name} after {failures} attempts — refunding user")
+            try:
+                chain.refund_failed_provision(wallet)
+                log.info(f"Refunded failed provision for {wallet}")
+            except Exception as e:
+                log.error(f"Failed to refund {wallet}: {e}")
             _teardown_instance(db, gcp, inst)
 
 
 def _handle_running_health(db: DB, gcp, inst: dict):
-    """Health check a running instance. Alert on repeated failures."""
     if not gcp or not inst["vm_ip"]:
         return
 
@@ -172,7 +208,6 @@ def _handle_running_health(db: DB, gcp, inst: dict):
 
 
 def _teardown_instance(db: DB, gcp, inst: dict):
-    """Tear down a VM and release its bot back to the pool."""
     wallet = inst["wallet_pubkey"]
     vm_name = inst["vm_instance_name"]
 
@@ -194,7 +229,6 @@ def _teardown_instance(db: DB, gcp, inst: dict):
 
 
 def _try_set_bot_handle(chain: ChainBackend, db: DB, inst: dict):
-    """Try to set the bot handle on-chain for an instance."""
     bot_handle = f"@{inst['bot_name']}"
     try:
         sig = chain.set_bot_handle(inst["wallet_pubkey"], bot_handle)
@@ -205,7 +239,6 @@ def _try_set_bot_handle(chain: ChainBackend, db: DB, inst: dict):
 
 
 async def billing_loop(cfg: Config, db: DB, chain: ChainBackend):
-    """Periodically bill all active bots."""
     while True:
         await asyncio.sleep(cfg.billing_interval_secs)
         try:
@@ -232,7 +265,15 @@ async def run():
     db.import_bots(bots)
     log.info(f"Loaded {len(bots)} telegram bots, {db.get_available_bot_count()} available")
 
-    # Create chain backend (mock or real)
+    # Startup validation
+    if cfg.max_instances > len(bots):
+        log.critical(
+            f"MAX_INSTANCES ({cfg.max_instances}) exceeds available telegram bots ({len(bots)}). Aborting."
+        )
+        sys.exit(1)
+    log.info(f"Max instances: {cfg.max_instances}")
+
+    # Create chain backend
     if cfg.mock_state_file:
         chain: ChainBackend = MockBackend(cfg.mock_state_file)
         log.info(f"Using MOCK chain backend from {cfg.mock_state_file}")
@@ -240,14 +281,12 @@ async def run():
         chain = SolanaBackend(cfg.solana_rpc_url, cfg.operator_keypair)
         log.info("Using Solana RPC chain backend")
 
-    # Fetch operator config
     cfg.operator_config = chain.fetch_operator_config()
     log.info(
         f"Operator config: billing={cfg.operator_config['billing_amount']} lamports, "
         f"authority={cfg.operator_config['authority']}"
     )
 
-    # Create GCP manager (None in mock mode unless GCP_PROJECT_ID is set)
     gcp = None
     if cfg.gcp_project_id:
         from .gcp import GCPManager
