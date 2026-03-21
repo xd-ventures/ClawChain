@@ -61,7 +61,8 @@ def watcher_tick(cfg: Config, db: DB, gcp, chain: ChainBackend):
             continue
         tg_id, tg_name, tg_token = alloc
 
-        vm_name = f"picoclaw-{wallet[:8].lower()}"
+        import time as _time
+        vm_name = f"picoclaw-{wallet[:8].lower()}-{int(_time.time()) % 100000}"
         log.info(f"Provisioning VM {vm_name} for wallet {wallet} with bot @{tg_name}")
 
         if gcp:
@@ -107,7 +108,8 @@ def watcher_tick(cfg: Config, db: DB, gcp, chain: ChainBackend):
                 log.error("No available telegram bots for reactivation!")
                 continue
             tg_id, tg_name, tg_token = alloc
-            vm_name = f"picoclaw-{wallet[:8].lower()}-r"
+            import time as _time
+            vm_name = f"picoclaw-{wallet[:8].lower()}-{int(_time.time()) % 100000}"
             log.info(f"Re-provisioning VM {vm_name} for reactivated wallet {wallet}")
 
             if gcp:
