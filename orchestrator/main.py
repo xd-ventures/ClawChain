@@ -335,9 +335,10 @@ def setup_logging():
     console.addFilter(lambda r: not r.name.startswith("httpx") and not r.name.startswith("httpcore"))
     root.addHandler(console)
 
-    # File: everything including httpx (for debugging)
+    # File: everything (unbuffered so we don't lose logs on crash)
     file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(logging.DEBUG)
+    file_handler.stream.reconfigure(line_buffering=True)
     file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
     root.addHandler(file_handler)
 
