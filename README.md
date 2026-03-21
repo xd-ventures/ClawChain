@@ -157,4 +157,4 @@ MIT
 
 ---
 
-*Built for the [Solana Agent Hackathon](https://colosseum.com/agent-hackathon/) by [Colosseum](https://colosseum.com/).*
+*Forged at [Blockchain Hack Warsaw](https://luma.com/HACKWARSAW) — organized by [Superteam Poland](https://pl.superteam.fun/), the talent layer of [Solana](https://solana.com) in 🇵🇱. Heading to the [Colosseum](https://colosseum.com/) Hackathon — from Brain Embassy, Warsaw straight to the arena.*
