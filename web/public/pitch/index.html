@@ -164,6 +164,58 @@
       background: linear-gradient(90deg, var(--color-cyan), var(--color-magenta));
       margin: 0.8em 0;
     }
+    .reveal .demo-grid-large {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.8em;
+      margin: 0.5em 0;
+    }
+    .reveal .demo-item {
+      cursor: pointer;
+      position: relative;
+      border: 1px solid rgba(0,240,255,0.3);
+      border-radius: 4px;
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .reveal .demo-item:hover {
+      border-color: var(--color-cyan);
+      box-shadow: 0 0 15px rgba(0,240,255,0.3);
+    }
+    .reveal .demo-item img {
+      width: 100%;
+      display: block;
+    }
+    .reveal .demo-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.75);
+      color: var(--color-cyan);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65em;
+      padding: 0.3em 0.6em;
+      text-align: center;
+    }
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0,0,0,0.92);
+      cursor: pointer;
+      justify-content: center;
+      align-items: center;
+    }
+    #lightbox.active { display: flex; }
+    #lightbox img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border: 2px solid var(--color-cyan);
+      border-radius: 6px;
+      box-shadow: var(--glow-cyan);
+    }
   </style>
 </head>
 <body>
@@ -222,14 +274,36 @@
           <span class="badge badge-magenta">51 orchestrator tests</span>
           <span class="badge badge-yellow">Devnet E2E</span>
         </div>
+      </section>
 
-        <div class="demo-grid" style="margin-top:0.6em;">
-          <img src="img/03-deposit-click.jpg" alt="Deposit">
-          <img src="img/05-setting-up-bot.jpg" alt="Setting up">
-          <img src="img/06-bot-is-live.jpg" alt="Bot live">
-          <img src="img/07-telegram-chat.jpg" alt="Telegram">
+      <!-- SLIDE 4b: Demo Screenshots -->
+      <section>
+        <h2>Live Demo</h2>
+        <p class="muted">Click any screenshot to zoom in</p>
+        <div class="demo-grid-large">
+          <div class="demo-item" onclick="openLightbox(this)">
+            <img src="img/03-deposit-click.jpg" alt="Deposit">
+            <span class="demo-label">Deposit SOL</span>
+          </div>
+          <div class="demo-item" onclick="openLightbox(this)">
+            <img src="img/05-setting-up-bot.jpg" alt="Setting up">
+            <span class="demo-label">Provisioning</span>
+          </div>
+          <div class="demo-item" onclick="openLightbox(this)">
+            <img src="img/06-bot-is-live.jpg" alt="Bot live">
+            <span class="demo-label">Bot is Live</span>
+          </div>
+          <div class="demo-item" onclick="openLightbox(this)">
+            <img src="img/07-telegram-chat.jpg" alt="Telegram">
+            <span class="demo-label">Telegram Chat</span>
+          </div>
         </div>
       </section>
+
+      <!-- Lightbox overlay -->
+      <div id="lightbox" onclick="closeLightbox()">
+        <img id="lightbox-img" src="" alt="">
+      </div>
 
       <!-- SLIDE 5: Roadmap -->
       <section>
@@ -322,6 +396,19 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>
+    function openLightbox(el) {
+      var img = el.querySelector('img');
+      document.getElementById('lightbox-img').src = img.src;
+      document.getElementById('lightbox').classList.add('active');
+    }
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('active');
+    }
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeLightbox();
+    });
+  </script>
   <script>
     Reveal.initialize({
       hash: true,
