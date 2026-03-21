@@ -31,6 +31,7 @@ class DB:
                     vm_ip TEXT,
                     status TEXT NOT NULL DEFAULT 'provisioning',
                     bot_handle_set_on_chain INTEGER NOT NULL DEFAULT 0,
+                    health_failures INTEGER NOT NULL DEFAULT 0,
                     created_at TEXT NOT NULL,
                     stopped_at TEXT,
                     last_billed_at TEXT,
@@ -89,11 +90,40 @@ class DB:
                 (wallet_pubkey, telegram_bot_id, bot_name, vm_instance_name, vm_zone, now),
             )
 
-    def update_instance_running(self, wallet_pubkey: str, vm_ip: str):
+    def update_instance_ip(self, wallet_pubkey: str, vm_ip: str):
+        """Store IP once VM is RUNNING but before health check passes."""
         with self.conn:
             self.conn.execute(
-                "UPDATE instances SET status='running', vm_ip=? WHERE wallet_pubkey=? AND status='provisioning'",
+                "UPDATE instances SET vm_ip=? WHERE wallet_pubkey=? AND status='provisioning'",
                 (vm_ip, wallet_pubkey),
+            )
+
+    def update_instance_running(self, wallet_pubkey: str):
+        """Transition to running after health check passes."""
+        with self.conn:
+            self.conn.execute(
+                "UPDATE instances SET status='running', health_failures=0 WHERE wallet_pubkey=? AND status='provisioning'",
+                (wallet_pubkey,),
+            )
+
+    def increment_health_failures(self, wallet_pubkey: str, error_msg: str) -> int:
+        """Increment health failure counter. Returns new count."""
+        with self.conn:
+            self.conn.execute(
+                "UPDATE instances SET health_failures=health_failures+1, error_message=? WHERE wallet_pubkey=? AND status IN ('provisioning','running')",
+                (error_msg, wallet_pubkey),
+            )
+            row = self.conn.execute(
+                "SELECT health_failures FROM instances WHERE wallet_pubkey=? ORDER BY id DESC LIMIT 1",
+                (wallet_pubkey,),
+            ).fetchone()
+            return row["health_failures"] if row else 0
+
+    def reset_health_failures(self, wallet_pubkey: str):
+        with self.conn:
+            self.conn.execute(
+                "UPDATE instances SET health_failures=0, error_message=NULL WHERE wallet_pubkey=? AND status='running'",
+                (wallet_pubkey,),
             )
 
     def update_instance_bot_handle_set(self, wallet_pubkey: str):

@@ -10,7 +10,7 @@ PICOCLAW_CONFIG_TEMPLATE = {
     "agents": {
         "defaults": {
             "workspace": "~/.picoclaw/workspace",
-            "model_name": "gpt-5.4",
+            "model_name": "openrouter-auto",
             "max_tokens": 8192,
             "temperature": 0.7,
             "max_tool_iterations": 20,
@@ -18,9 +18,10 @@ PICOCLAW_CONFIG_TEMPLATE = {
     },
     "model_list": [
         {
-            "model_name": "gpt-5.4",
-            "model": "openai/gpt-5.4",
+            "model_name": "openrouter-auto",
+            "model": "openrouter/auto",
             "api_key": "__OPENROUTER_API_KEY__",
+            "api_base": "https://openrouter.ai/api/v1",
             "request_timeout": 300,
         }
     ],
@@ -69,6 +70,9 @@ def generate_container_declaration(container_image: str) -> str:
   containers:
     - name: picoclaw
       image: {container_image}
+      env:
+        - name: PICOCLAW_GATEWAY_HOST
+          value: "0.0.0.0"
       volumeMounts:
         - name: picoclaw-config
           mountPath: /root/.picoclaw

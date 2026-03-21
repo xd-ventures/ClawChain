@@ -5,12 +5,16 @@ PicoClaw as a Docker container. No custom base image needed.
 """
 
 import logging
+import urllib.request
+import urllib.error
 
 log = logging.getLogger("orchestrator.gcp")
 
 # COS image — always use the latest stable Container-Optimized OS
 COS_IMAGE_PROJECT = "cos-cloud"
 COS_IMAGE_FAMILY = "cos-stable"
+
+PICOCLAW_HEALTH_PORT = 18790
 
 
 class GCPManager:
@@ -45,13 +49,7 @@ class GCPManager:
         cloud_init_userdata: str,
         container_declaration: str,
     ) -> str:
-        """Create a COS VM that runs a PicoClaw container.
-
-        Args:
-            instance_name: GCP instance name
-            cloud_init_userdata: cloud-init YAML that writes config to host
-            container_declaration: gce-container-declaration YAML for the container spec
-        """
+        """Create a COS VM that runs a PicoClaw container."""
         cv1 = self._compute_v1
         cos_image = self._get_cos_image()
 
@@ -86,6 +84,7 @@ class GCPManager:
             disks=[disk],
             network_interfaces=[network_interface],
             metadata=metadata,
+            tags=cv1.Tags(items=["picoclaw"]),
         )
 
         if self.sa_email:
@@ -125,3 +124,14 @@ class GCPManager:
             return None
         except Exception:
             return None
+
+    @staticmethod
+    def check_container_health(ip: str, timeout: int = 5) -> bool:
+        """Check PicoClaw health endpoint. Returns True if container responds 200."""
+        url = f"http://{ip}:{PICOCLAW_HEALTH_PORT}/health"
+        try:
+            req = urllib.request.Request(url, method="GET")
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return resp.status == 200
+        except (urllib.error.URLError, OSError, TimeoutError):
+            return False

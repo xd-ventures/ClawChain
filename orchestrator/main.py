@@ -16,6 +16,10 @@ logging.basicConfig(
 )
 log = logging.getLogger("orchestrator")
 
+# Health check thresholds
+MAX_PROVISION_HEALTH_FAILURES = 20   # ~5 min at 15s polls — give up provisioning
+MAX_RUNNING_HEALTH_FAILURES = 10     # ~2.5 min — log critical alert (don't tear down, container may restart)
+
 
 async def watcher_loop(cfg: Config, db: DB, gcp, chain: ChainBackend):
     """Poll chain for new deposits and state changes."""
@@ -56,25 +60,15 @@ async def watcher_loop(cfg: Config, db: DB, gcp, chain: ChainBackend):
 
                 db.create_instance(wallet, tg_id, tg_name, vm_name, cfg.gcp_zone)
 
-            # --- CHECK PROVISIONING -> RUNNING ---
+            # --- CHECK PROVISIONING INSTANCES ---
             for inst in db.get_active_instances():
                 if inst["status"] == "provisioning":
-                    if gcp:
-                        status = gcp.get_instance_status(inst["vm_instance_name"])
-                        if status != "RUNNING":
-                            continue
-                        ip = gcp.get_instance_ip(inst["vm_instance_name"]) or ""
-                    else:
-                        # Mock mode: immediately transition to running
-                        ip = "10.0.0.1"
+                    _handle_provisioning(cfg, db, gcp, chain, inst)
 
-                    db.update_instance_running(inst["wallet_pubkey"], ip)
-                    log.info(f"VM {inst['vm_instance_name']} is RUNNING at {ip}")
-                    _try_set_bot_handle(chain, db, inst)
-
-                # Retry failed handle writes
-                if inst["status"] == "running" and not inst["bot_handle_set_on_chain"]:
-                    _try_set_bot_handle(chain, db, inst)
+            # --- HEALTH CHECK RUNNING INSTANCES ---
+            for inst in db.get_active_instances():
+                if inst["status"] == "running":
+                    _handle_running_health(db, gcp, inst)
 
             # --- HANDLE REACTIVATION ---
             for bot in all_bots:
@@ -110,24 +104,93 @@ async def watcher_loop(cfg: Config, db: DB, gcp, chain: ChainBackend):
                 wallet = inst["wallet_pubkey"]
                 chain_bot = on_chain.get(wallet)
                 if chain_bot and not chain_bot["is_active"]:
-                    log.info(f"Tearing down VM {inst['vm_instance_name']} for deactivated wallet {wallet}")
-                    db.update_instance_stopping(wallet)
-                    if gcp:
-                        try:
-                            gcp.delete_instance(inst["vm_instance_name"])
-                        except Exception as e:
-                            log.error(f"Failed to delete VM {inst['vm_instance_name']}: {e}")
-                    else:
-                        log.info(f"[DRY-RUN] Would delete VM {inst['vm_instance_name']}")
-                    db.update_instance_stopped(wallet)
-                    if inst["telegram_bot_id"]:
-                        db.release_bot(inst["telegram_bot_id"])
-                    log.info(f"VM deleted, bot released for wallet {wallet}")
+                    _teardown_instance(db, gcp, inst)
 
         except Exception as e:
             log.exception(f"Watcher loop error: {e}")
 
         await asyncio.sleep(cfg.poll_interval_secs)
+
+
+def _handle_provisioning(cfg: Config, db: DB, gcp, chain: ChainBackend, inst: dict):
+    """Handle an instance in provisioning state: wait for VM, then health check."""
+    wallet = inst["wallet_pubkey"]
+    vm_name = inst["vm_instance_name"]
+
+    if not gcp:
+        # Mock mode: skip straight to running
+        db.update_instance_ip(wallet, "10.0.0.1")
+        db.update_instance_running(wallet)
+        log.info(f"[DRY-RUN] VM {vm_name} is RUNNING")
+        _try_set_bot_handle(chain, db, inst)
+        return
+
+    # Check if VM is up yet
+    if not inst["vm_ip"]:
+        status = gcp.get_instance_status(vm_name)
+        if status != "RUNNING":
+            return  # Still starting
+        ip = gcp.get_instance_ip(vm_name) or ""
+        db.update_instance_ip(wallet, ip)
+        log.info(f"VM {vm_name} is RUNNING at {ip}, waiting for container health...")
+        return  # Wait for next poll to health check
+
+    # VM is up, has IP — check container health
+    ip = inst["vm_ip"]
+    if gcp.check_container_health(ip):
+        db.update_instance_running(wallet)
+        log.info(f"Container healthy on {vm_name} ({ip}) — setting bot handle")
+        _try_set_bot_handle(chain, db, inst)
+    else:
+        failures = db.increment_health_failures(wallet, "Container health check failed during provisioning")
+        log.warning(f"Health check failed for {vm_name} ({ip}), attempt {failures}/{MAX_PROVISION_HEALTH_FAILURES}")
+
+        if failures >= MAX_PROVISION_HEALTH_FAILURES:
+            log.error(f"Container failed to start on {vm_name} after {failures} attempts — tearing down")
+            _teardown_instance(db, gcp, inst)
+
+
+def _handle_running_health(db: DB, gcp, inst: dict):
+    """Health check a running instance. Alert on repeated failures."""
+    if not gcp or not inst["vm_ip"]:
+        return
+
+    wallet = inst["wallet_pubkey"]
+    vm_name = inst["vm_instance_name"]
+    ip = inst["vm_ip"]
+
+    if gcp.check_container_health(ip):
+        if inst["health_failures"] > 0:
+            log.info(f"Health recovered for {vm_name} ({ip})")
+            db.reset_health_failures(wallet)
+    else:
+        failures = db.increment_health_failures(wallet, "Container health check failed while running")
+        if failures >= MAX_RUNNING_HEALTH_FAILURES:
+            log.critical(f"Container unhealthy on {vm_name} ({ip}) for {failures} consecutive checks!")
+        else:
+            log.warning(f"Health check failed for {vm_name} ({ip}), consecutive failures: {failures}")
+
+
+def _teardown_instance(db: DB, gcp, inst: dict):
+    """Tear down a VM and release its bot back to the pool."""
+    wallet = inst["wallet_pubkey"]
+    vm_name = inst["vm_instance_name"]
+
+    log.info(f"Tearing down VM {vm_name} for wallet {wallet}")
+    db.update_instance_stopping(wallet)
+
+    if gcp:
+        try:
+            gcp.delete_instance(vm_name)
+        except Exception as e:
+            log.error(f"Failed to delete VM {vm_name}: {e}")
+    else:
+        log.info(f"[DRY-RUN] Would delete VM {vm_name}")
+
+    db.update_instance_stopped(wallet)
+    if inst["telegram_bot_id"]:
+        db.release_bot(inst["telegram_bot_id"])
+    log.info(f"VM deleted, bot released for wallet {wallet}")
 
 
 def _try_set_bot_handle(chain: ChainBackend, db: DB, inst: dict):
