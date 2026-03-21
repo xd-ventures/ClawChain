@@ -5,7 +5,7 @@ import { PublicKey } from "@solana/web3.js";
 import { useUserBot } from "../hooks/useUserBot";
 import { useServiceStatus } from "../hooks/useServiceStatus";
 import { useProgram } from "../hooks/useProgram";
-import { PROGRAM_ID } from "../lib/constants";
+import { PROGRAM_ID, LAMPORTS_PER_SOL } from "../lib/constants";
 import { BotStatus } from "./BotStatus";
 import { DepositForm } from "./DepositForm";
 import { ServiceInfo } from "./ServiceInfo";
@@ -76,6 +76,10 @@ export function Dashboard() {
     );
   }
 
+  // Stopped / Failed state
+  const balance = userBot.availableBalance / LAMPORTS_PER_SOL;
+  const hasBalance = userBot.availableBalance > 0;
+
   return (
     <div className="dashboard">
       <h2 className="dashboard-title">
@@ -86,12 +90,19 @@ export function Dashboard() {
           ? "VM failed to start. You can withdraw your deposit."
           : "Your bot has been deactivated."}
       </p>
-      <div className="dashboard-actions">
-        <WithdrawButton onAction={userBot.refresh} />
-      </div>
+
+      {hasBalance ? (
+        <div className="dashboard-actions">
+          <p className="dashboard-balance">Available balance: <strong>{balance.toFixed(4)} SOL</strong></p>
+          <WithdrawButton onAction={userBot.refresh} />
+        </div>
+      ) : (
+        <p className="dashboard-hint">No remaining balance to withdraw.</p>
+      )}
+
       <div className="dashboard-reactivate">
         <p className="dashboard-hint">Want to start a new bot?</p>
-        <DepositForm onDeposited={userBot.refresh} label="Reactivate" />
+        <DepositForm onDeposited={userBot.refresh} label="Reactivate" defaultAmount="" />
       </div>
       <ServiceInfo status={serviceStatus} />
     </div>
@@ -102,9 +113,13 @@ function WithdrawButton({ onAction }: { onAction: () => void }) {
   const { publicKey } = useWallet();
   const program = useProgram();
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const handleWithdraw = async () => {
     if (!publicKey || !program) return;
+    setError("");
+    setSuccess(false);
     setBusy(true);
     try {
       const [pda] = PublicKey.findProgramAddressSync(
@@ -112,17 +127,26 @@ function WithdrawButton({ onAction }: { onAction: () => void }) {
         PROGRAM_ID
       );
       await program.methods.withdrawRemaining().accounts({ userBot: pda, owner: publicKey }).rpc();
+      setSuccess(true);
       onAction();
     } catch (e: any) {
-      console.error("Withdraw failed:", e);
+      const msg = e.message || "Withdraw failed";
+      if (msg.includes("NothingToWithdraw") || msg.includes("6006")) {
+        setError("No balance to withdraw.");
+      } else {
+        setError(msg.slice(0, 100));
+      }
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <button className="neon-btn neon-btn-magenta" onClick={handleWithdraw} disabled={busy}>
-      {busy ? "Withdrawing..." : "Withdraw Deposit"}
-    </button>
+    <div className="withdraw-wrapper">
+      <button className="neon-btn neon-btn-magenta" onClick={handleWithdraw} disabled={busy || success}>
+        {busy ? "Withdrawing..." : success ? "Withdrawn!" : "Withdraw Deposit"}
+      </button>
+      {error && <p className="deposit-error">{error}</p>}
+    </div>
   );
 }

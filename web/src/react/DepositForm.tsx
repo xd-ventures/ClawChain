@@ -8,12 +8,13 @@ import { PROGRAM_ID, LAMPORTS_PER_SOL } from "../lib/constants";
 interface Props {
   onDeposited: () => void;
   label?: string;
+  defaultAmount?: string;
 }
 
-export function DepositForm({ onDeposited, label = "Deposit SOL" }: Props) {
+export function DepositForm({ onDeposited, label = "Deposit SOL", defaultAmount = "0.1" }: Props) {
   const { publicKey } = useWallet();
   const program = useProgram();
-  const [amount, setAmount] = useState("0.1");
+  const [amount, setAmount] = useState(defaultAmount);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
