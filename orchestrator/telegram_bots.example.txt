@@ -1,0 +1,6 @@
+# Telegram bot pool for testing
+# Format: bot_name:bot_token
+# Generate real bots via @BotFather on Telegram
+picoclaw_alpha_bot:0000000000:AAA-fake-token-alpha
+picoclaw_beta_bot:0000000001:AAA-fake-token-beta
+picoclaw_gamma_bot:0000000002:AAA-fake-token-gamma

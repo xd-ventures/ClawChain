@@ -1,0 +1,38 @@
+# Mock blockchain state for testing the orchestrator without Solana.
+#
+# Edit this file while the orchestrator is running — it re-reads on every poll.
+# The orchestrator writes back changes (set_bot_handle, bill) to this file.
+#
+# Usage:
+#   MOCK_STATE_FILE=./mock_state.yaml python -m orchestrator.main
+
+operator_config:
+  authority: "MockOperatorAuthority111111111111111111111111"
+  treasury: "MockTreasury11111111111111111111111111111111"
+  billing_amount: 10000000    # 0.01 SOL in lamports
+  min_deposit: 50000000       # 0.05 SOL in lamports
+
+user_bots:
+  # User 1: new deposit, needs provisioning (is_active=true, bot_handle empty)
+  - owner: "UserWallet1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    bot_handle: ""
+    is_active: true
+    total_deposited: 100000000   # 0.1 SOL
+    total_billed: 0
+    available_balance: 100000000
+
+  # User 2: already provisioned and running
+  - owner: "UserWallet2BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+    bot_handle: "@picoclaw_beta_bot"
+    is_active: true
+    total_deposited: 200000000
+    total_billed: 30000000
+    available_balance: 170000000
+
+  # User 3: deactivated by user (orchestrator should tear down VM)
+  - owner: "UserWallet3CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+    bot_handle: "@picoclaw_gamma_bot"
+    is_active: false
+    total_deposited: 50000000
+    total_billed: 50000000
+    available_balance: 0
