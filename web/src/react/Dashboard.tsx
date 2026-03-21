@@ -39,6 +39,7 @@ export function Dashboard() {
     );
   }
 
+  // No account yet
   if (!userBot.exists) {
     return (
       <div className="dashboard">
@@ -52,6 +53,7 @@ export function Dashboard() {
     );
   }
 
+  // Active + Ready = bot is live
   if (userBot.isActive && userBot.botHandle && userBot.provisioningStatus === 2) {
     return (
       <div className="dashboard">
@@ -61,6 +63,7 @@ export function Dashboard() {
     );
   }
 
+  // Active + provisioning in progress
   if (userBot.isActive && userBot.provisioningStatus < 2) {
     return (
       <div className="dashboard">
@@ -76,7 +79,7 @@ export function Dashboard() {
     );
   }
 
-  // Stopped / Failed state
+  // Stopped / Failed
   const balance = userBot.availableBalance / LAMPORTS_PER_SOL;
   const hasBalance = userBot.availableBalance > 0;
 
@@ -87,22 +90,33 @@ export function Dashboard() {
       </h2>
       <p className="dashboard-subtitle">
         {userBot.provisioningStatus === 3
-          ? "VM failed to start. You can withdraw your deposit."
+          ? "VM failed to start."
           : "Your bot has been deactivated."}
       </p>
 
-      {hasBalance ? (
+      <div className="bot-stats">
+        <div className="stat">
+          <span className="stat-label">Balance</span>
+          <span className="stat-value">{balance.toFixed(4)} SOL</span>
+        </div>
+        <div className="stat">
+          <span className="stat-label">Deposited</span>
+          <span className="stat-value">{(userBot.totalDeposited / LAMPORTS_PER_SOL).toFixed(4)} SOL</span>
+        </div>
+        <div className="stat">
+          <span className="stat-label">Billed</span>
+          <span className="stat-value">{(userBot.totalBilled / LAMPORTS_PER_SOL).toFixed(4)} SOL</span>
+        </div>
+      </div>
+
+      {hasBalance && (
         <div className="dashboard-actions">
-          <p className="dashboard-balance">Available balance: <strong>{balance.toFixed(4)} SOL</strong></p>
           <WithdrawButton onAction={userBot.refresh} />
         </div>
-      ) : (
-        <p className="dashboard-hint">No remaining balance to withdraw.</p>
       )}
 
       <div className="dashboard-reactivate">
-        <p className="dashboard-hint">Want to start a new bot?</p>
-        <DepositForm onDeposited={userBot.refresh} label="Reactivate" defaultAmount="" />
+        <DepositForm onDeposited={userBot.refresh} label="Deposit & Reactivate" />
       </div>
       <ServiceInfo status={serviceStatus} />
     </div>
@@ -144,7 +158,7 @@ function WithdrawButton({ onAction }: { onAction: () => void }) {
   return (
     <div className="withdraw-wrapper">
       <button className="neon-btn neon-btn-magenta" onClick={handleWithdraw} disabled={busy || success}>
-        {busy ? "Withdrawing..." : success ? "Withdrawn!" : "Withdraw Deposit"}
+        {busy ? "Withdrawing..." : success ? "Withdrawn!" : "Withdraw Balance"}
       </button>
       {error && <p className="deposit-error">{error}</p>}
     </div>
