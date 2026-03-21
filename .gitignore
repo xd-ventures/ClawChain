@@ -1,0 +1,21 @@
+.anchor
+.DS_Store
+target
+**/*.rs.bk
+node_modules
+test-ledger
+.yarn
+
+# Orchestrator secrets and runtime data
+.env
+orchestrator/.env
+telegram_bots.txt
+orchestrator/telegram_bots.txt
+*.db
+orchestrator/*.db
+__pycache__
+**/__pycache__
+
+# Keypairs — never commit
+*-keypair.json
+**/wallet_user*.json
