@@ -87,6 +87,24 @@ Commit each major step separately so the history is reviewable:
 
 Before committing, always verify no secrets are staged: `git diff --cached --name-only` — watch for `.env`, `telegram_bots.txt`, `*-keypair.json`, `wallet_user*.json`.
 
+## Testing Requirements
+
+**Every change must pass the full test suite before committing.** Run both:
+
+```bash
+anchor test                          # 25 Solana program tests (local validator)
+cd orchestrator && pytest -v         # 51 Python orchestrator tests
+```
+
+**New features must include tests:**
+- Solana program changes → add/update tests in `tests/claw_chain.ts`
+- Orchestrator changes → add/update tests in `orchestrator/tests/`
+  - Pure functions → unit test (Level 1: test_db, test_cloud_init, etc.)
+  - Orchestrator loop logic → integration test (Level 2: test_orchestrator.py using `watcher_tick()`)
+  - GCP/Solana interactions → mock external deps, never hit real services in automated tests
+
+Do not merge or push code with failing tests.
+
 ## Architectural Decisions
 
 > This section is append-only. When a decision is superseded, add a new entry
