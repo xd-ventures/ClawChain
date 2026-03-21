@@ -132,7 +132,12 @@ def watcher_tick(cfg: Config, db: DB, gcp, chain: ChainBackend):
     for inst in db.get_active_instances():
         wallet = inst["wallet_pubkey"]
         chain_bot = fresh_chain.get(wallet)
-        if chain_bot and not chain_bot["is_active"]:
+        if not chain_bot:
+            continue
+        # Only tear down if BOTH on-chain is inactive AND bot handle was previously set
+        # (meaning the bot was running and user deactivated). Don't tear down if still
+        # in provisioning flow (handle empty = never fully provisioned in this session).
+        if not chain_bot["is_active"] and inst["bot_handle_set_on_chain"]:
             _teardown_instance(db, gcp, inst)
 
     # --- UPDATE ON-CHAIN SERVICE STATUS ---

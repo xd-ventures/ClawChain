@@ -140,11 +140,12 @@ def test_teardown_deactivated_bot(tmp_path):
          "available_balance": 100_000_000},
     ])
 
-    # Simulate a running instance
+    # Simulate a fully running instance (handle set on-chain)
     db.import_bots([("bot0", "token0")])
     bot_id, _, _ = db.allocate_bot("WalletA")
     db.create_instance("WalletA", bot_id, "bot0", "vm-a", "zone")
     db.update_instance_running("WalletA")
+    db.update_instance_bot_handle_set("WalletA")
 
     # Now deactivate in YAML
     with open(state_file) as f:
