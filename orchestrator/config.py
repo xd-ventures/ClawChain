@@ -51,7 +51,10 @@ class Config:
 
     @classmethod
     def from_env(cls) -> "Config":
-        load_dotenv()
+        # Load .env from orchestrator/ dir or cwd
+        from pathlib import Path
+        env_path = Path(__file__).parent / ".env"
+        load_dotenv(env_path if env_path.exists() else None)
 
         mock_state_file = os.environ.get("MOCK_STATE_FILE", "")
         operator_keypair = None
