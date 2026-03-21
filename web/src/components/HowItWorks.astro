@@ -1,0 +1,61 @@
+---
+import GlitchText from './GlitchText.astro';
+import StepCard from './StepCard.astro';
+
+const steps = [
+  {
+    number: '01',
+    title: 'Deposit SOL',
+    description: 'Send SOL to the ClawChain program on Solana. That\'s your account.',
+  },
+  {
+    number: '02',
+    title: 'Auto-Provisioning',
+    description: 'An orchestrator watches the chain, sees your deposit, and spins up a fresh PicoClaw instance.',
+  },
+  {
+    number: '03',
+    title: 'Telegram Delivery',
+    description: 'Your bot\'s Telegram handle is written to your on-chain account. Open Telegram, start chatting.',
+  },
+  {
+    number: '04',
+    title: 'Pay-as-you-Run',
+    description: 'The orchestrator periodically transfers a portion of your balance while your bot is active.',
+  },
+  {
+    number: '05',
+    title: 'Stop Anytime',
+    description: 'Set a flag on your on-chain account. The orchestrator shuts down your VM and stops billing.',
+  },
+];
+---
+
+<section class="how-it-works">
+  <GlitchText text="How It Works" tag="h2" color="cyan" />
+  <div class="steps-grid">
+    {steps.map((step) => (
+      <StepCard number={step.number} title={step.title} description={step.description} />
+    ))}
+  </div>
+</section>
+
+<style>
+  .how-it-works {
+    padding: var(--section-padding);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .how-it-works :global(h2) {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+</style>

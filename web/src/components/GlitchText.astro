@@ -1,0 +1,53 @@
+---
+interface Props {
+  text: string;
+  tag?: string;
+  color?: 'cyan' | 'magenta' | 'yellow';
+}
+
+const { text, tag = 'h2', color = 'cyan' } = Astro.props;
+const Tag = tag;
+---
+
+<Tag class={`glitch glitch--${color}`} data-text={text}>{text}</Tag>
+
+<style>
+  .glitch {
+    position: relative;
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: inline-block;
+  }
+
+  .glitch--cyan   { color: var(--color-cyan); }
+  .glitch--magenta { color: var(--color-magenta); }
+  .glitch--yellow  { color: var(--color-yellow); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .glitch::before,
+    .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .glitch::before {
+      color: var(--color-cyan);
+      animation: glitch-1 4s infinite linear alternate-reverse;
+      clip-path: inset(0 0 80% 0);
+      opacity: 0.8;
+    }
+
+    .glitch::after {
+      color: var(--color-magenta);
+      animation: glitch-2 3.5s infinite linear alternate-reverse;
+      clip-path: inset(80% 0 0 0);
+      opacity: 0.8;
+    }
+  }
+</style>

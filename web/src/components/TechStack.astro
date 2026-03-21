@@ -1,0 +1,94 @@
+---
+import GlitchText from './GlitchText.astro';
+
+const stack = [
+  { layer: 'AI Agent', tech: 'PicoClaw', detail: 'Go, single binary, <10MB' },
+  { layer: 'Blockchain', tech: 'Solana', detail: 'High-throughput L1' },
+  { layer: 'Smart Contracts', tech: 'Anchor', detail: 'Rust framework' },
+  { layer: 'Orchestrator', tech: 'Python + SQLite', detail: 'Lightweight & portable' },
+  { layer: 'Infrastructure', tech: 'GCP Micro VMs', detail: 'Dedicated isolation' },
+  { layer: 'User Interface', tech: 'Telegram', detail: 'Native PicoClaw integration' },
+];
+---
+
+<section class="tech-stack">
+  <GlitchText text="Tech Stack" tag="h2" color="yellow" />
+  <div class="stack-grid">
+    {stack.map((item) => (
+      <div class="stack-row">
+        <span class="stack-layer">{item.layer}</span>
+        <span class="stack-tech">{item.tech}</span>
+        <span class="stack-detail">{item.detail}</span>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .tech-stack {
+    padding: var(--section-padding);
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .tech-stack :global(h2) {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .stack-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .stack-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-cyan);
+    clip-path: var(--clip-corner-sm);
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  .stack-row:hover {
+    border-color: var(--color-cyan);
+    box-shadow: var(--glow-cyan);
+  }
+
+  .stack-layer {
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-cyan);
+  }
+
+  .stack-tech {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    color: var(--color-white);
+  }
+
+  .stack-detail {
+    font-size: 1rem;
+    color: var(--color-muted);
+    text-align: right;
+  }
+
+  @media (max-width: 600px) {
+    .stack-row {
+      grid-template-columns: 1fr;
+      gap: 0.3rem;
+    }
+
+    .stack-detail {
+      text-align: left;
+    }
+  }
+</style>

@@ -1,0 +1,282 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import App from '../react/App';
+---
+
+<BaseLayout title="ClawChain — Start Chatting">
+  <section class="app-container">
+    <a href="/" class="back-link">&larr; Back to home</a>
+    <App client:only="react" />
+  </section>
+</BaseLayout>
+
+<style>
+  .app-container {
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem var(--gutter);
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .back-link {
+    align-self: flex-start;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+    text-decoration: none;
+  }
+
+  .back-link:hover {
+    color: var(--color-cyan);
+  }
+</style>
+
+<style is:global>
+  /* Wallet adapter button styling to match neon theme */
+  .wallet-adapter-button {
+    font-family: var(--font-mono) !important;
+    background: transparent !important;
+    border: 1px solid var(--color-cyan) !important;
+    color: var(--color-cyan) !important;
+    padding: 0.8rem 1.6rem !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    transition: all 0.3s !important;
+  }
+
+  .wallet-adapter-button:hover {
+    background: rgba(0, 240, 255, 0.1) !important;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.3) !important;
+  }
+
+  .wallet-adapter-modal-wrapper {
+    font-family: var(--font-body) !important;
+  }
+
+  /* Dashboard styles */
+  .dashboard {
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .dashboard-title {
+    font-family: var(--font-heading);
+    color: var(--color-cyan);
+    font-size: 1.8rem;
+    text-shadow: var(--glow-cyan);
+  }
+
+  .dashboard-subtitle {
+    font-family: var(--font-body);
+    color: var(--color-muted);
+    font-size: 1.1rem;
+  }
+
+  .dashboard-hint {
+    font-family: var(--font-mono);
+    color: var(--color-muted);
+    font-size: 0.85rem;
+    opacity: 0.6;
+  }
+
+  .dashboard-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .wallet-button-wrapper {
+    margin: 1rem 0;
+  }
+
+  /* Spinner */
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(0, 240, 255, 0.2);
+    border-top-color: var(--color-cyan);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Neon buttons */
+  .neon-btn {
+    font-family: var(--font-mono);
+    padding: 0.7rem 1.4rem;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid;
+    background: transparent;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 0.95rem;
+  }
+
+  .neon-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .neon-btn-cyan {
+    color: var(--color-cyan);
+    border-color: var(--color-cyan);
+  }
+
+  .neon-btn-cyan:hover:not(:disabled) {
+    background: rgba(0, 240, 255, 0.1);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+  }
+
+  .neon-btn-magenta {
+    color: var(--color-magenta);
+    border-color: var(--color-magenta);
+  }
+
+  .neon-btn-magenta:hover:not(:disabled) {
+    background: rgba(255, 45, 111, 0.1);
+    box-shadow: 0 0 15px rgba(255, 45, 111, 0.3);
+  }
+
+  /* Bot status card */
+  .bot-handle-card {
+    background: rgba(0, 240, 255, 0.05);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-radius: 8px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .bot-handle {
+    font-family: var(--font-mono);
+    font-size: 1.4rem;
+    color: var(--color-cyan);
+    text-shadow: var(--glow-cyan);
+  }
+
+  .bot-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .stat-value {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    color: var(--color-white);
+  }
+
+  /* Deposit form */
+  .deposit-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .deposit-input-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .deposit-input {
+    font-family: var(--font-mono);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--color-white);
+    padding: 0.6rem 1rem;
+    border-radius: 4px;
+    width: 120px;
+    text-align: right;
+    font-size: 1rem;
+  }
+
+  .deposit-input:focus {
+    outline: none;
+    border-color: var(--color-cyan);
+  }
+
+  .deposit-unit {
+    font-family: var(--font-mono);
+    color: var(--color-muted);
+  }
+
+  .deposit-error {
+    color: var(--color-magenta);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+  }
+
+  .deposit-hint {
+    font-family: var(--font-mono);
+    color: var(--color-muted);
+    font-size: 0.8rem;
+    opacity: 0.5;
+  }
+
+  /* Service info */
+  .service-info {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    margin-top: 2rem;
+    opacity: 0.7;
+  }
+
+  .service-badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .service-badge.accepting {
+    color: var(--color-cyan);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+  }
+
+  .service-badge.full {
+    color: var(--color-magenta);
+    border: 1px solid rgba(255, 45, 111, 0.3);
+  }
+
+  .service-slots {
+    color: var(--color-muted);
+  }
+</style>

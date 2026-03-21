@@ -19,3 +19,6 @@ __pycache__
 # Keypairs — never commit
 *-keypair.json
 **/wallet_user*.json
+web/node_modules
+web/dist
+web/.astro

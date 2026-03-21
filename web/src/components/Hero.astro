@@ -1,0 +1,108 @@
+---
+import GlitchText from './GlitchText.astro';
+import NeonButton from './NeonButton.astro';
+---
+
+<section class="hero">
+  <div class="hero-content">
+    <GlitchText text="ClawChain" tag="h1" color="cyan" />
+    <p class="tagline">AI Agents as a Service, powered by <span class="neon-yellow">Solana</span></p>
+    <p class="subtitle">
+      Deposit SOL. Get a personal AI bot on Telegram.<br />
+      No accounts, no subscriptions, no DevOps.
+    </p>
+    <div class="cta-row">
+      <NeonButton href="/app" label="Start Chatting" color="cyan" />
+      <NeonButton href="https://github.com/xd-ventures/ClawChain" label="View on GitHub" color="magenta" />
+    </div>
+    <div class="badge">
+      <p>
+        Forged at <a href="https://luma.com/HACKWARSAW" target="_blank" rel="noopener noreferrer">Blockchain Hack Warsaw</a> &mdash;
+        organized by <a href="https://pl.superteam.fun/" target="_blank" rel="noopener noreferrer">Superteam Poland</a>,
+        the talent layer of <a href="https://solana.com" target="_blank" rel="noopener noreferrer">Solana</a> in&nbsp;&#x1F1F5;&#x1F1F1;
+      </p>
+      <p class="badge-sub">
+        Heading to the <a href="https://colosseum.com/" target="_blank" rel="noopener noreferrer">Colosseum</a> Hackathon &mdash; from Brain Embassy, Warsaw straight to the arena
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--section-padding);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 30% 50%, rgba(0, 240, 255, 0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 70% 50%, rgba(255, 45, 111, 0.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+  }
+
+  .hero-content :global(h1) {
+    font-size: clamp(3rem, 10vw, 6rem);
+    margin-bottom: 1rem;
+  }
+
+  .tagline {
+    font-family: var(--font-body);
+    font-size: clamp(1.4rem, 3vw, 1.8rem);
+    font-weight: 500;
+    color: var(--color-white);
+    margin-bottom: 1rem;
+  }
+
+  .subtitle {
+    font-family: var(--font-mono);
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    color: var(--color-muted);
+    margin-bottom: 2.5rem;
+    line-height: 1.8;
+  }
+
+  .cta-row {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 3rem;
+  }
+
+  .badge {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    color: var(--color-muted);
+    letter-spacing: 0.05em;
+  }
+
+  .badge a {
+    color: var(--color-yellow);
+  }
+
+  .badge a:hover {
+    text-shadow: var(--glow-yellow);
+  }
+
+  .badge-sub {
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
+    opacity: 0.7;
+  }
+</style>

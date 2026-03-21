@@ -1,0 +1,84 @@
+---
+import GlitchText from './GlitchText.astro';
+---
+
+<section class="team">
+  <GlitchText text="Team" tag="h2" color="cyan" />
+  <div class="team-card">
+    <h3 class="name">Maciej Sawicki</h3>
+    <p class="role">Cloud Architect &middot; SRE &middot; Infrastructure Engineer</p>
+    <p class="bio">
+      Background spanning Web3 infrastructure (validator operations), AI/ML platforms, and production-grade telecom systems. Certified GCP Cloud Architect and Kubernetes Application Developer.
+    </p>
+    <div class="links">
+      <a href="https://xd.ventures" target="_blank" rel="noopener noreferrer">xd.ventures</a>
+      <a href="https://github.com/xd-ventures" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .team {
+    padding: var(--section-padding);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .team :global(h2) {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .team-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    clip-path: var(--clip-corner);
+    padding: 2rem;
+    text-align: center;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  .team-card:hover {
+    border-color: var(--color-cyan);
+    box-shadow: var(--glow-cyan);
+  }
+
+  .name {
+    font-size: 1.5rem;
+    color: var(--color-white);
+    margin-bottom: 0.5rem;
+  }
+
+  .role {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    color: var(--color-cyan);
+    margin-bottom: 1rem;
+  }
+
+  .bio {
+    font-size: 1.15rem;
+    color: var(--color-muted);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .links {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+  }
+
+  .links a {
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    color: var(--color-yellow);
+    text-decoration: none;
+    transition: text-shadow 0.2s;
+  }
+
+  .links a:hover {
+    text-shadow: var(--glow-yellow);
+  }
+</style>

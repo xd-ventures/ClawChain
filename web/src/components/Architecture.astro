@@ -1,0 +1,174 @@
+---
+import GlitchText from './GlitchText.astro';
+---
+
+<section class="architecture">
+  <GlitchText text="Architecture" tag="h2" color="magenta" />
+
+  <div class="diagram">
+    <!-- Tier 1: Solana -->
+    <div class="tier tier--cyan">
+      <div class="tier-label">Solana Blockchain</div>
+      <div class="tier-boxes">
+        <div class="box">
+          <span class="box-title">User Account</span>
+          <span class="box-detail">deposit, bot handle, stop flag</span>
+        </div>
+        <div class="box">
+          <span class="box-title">ClawChain Program</span>
+          <span class="box-detail">on-chain state, bot registry</span>
+        </div>
+        <div class="box">
+          <span class="box-title">Operator Account</span>
+          <span class="box-detail">operational funds</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow">&#x25BC;</div>
+
+    <!-- Tier 2: Orchestrator -->
+    <div class="tier tier--yellow">
+      <div class="tier-label">Orchestrator</div>
+      <div class="tier-boxes">
+        <div class="box box--wide">
+          <span class="box-title">Python + SQLite</span>
+          <span class="box-detail">blockchain watcher &middot; GCP API &middot; billing loop</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow">&#x25BC;</div>
+
+    <!-- Tier 3: VMs -->
+    <div class="tier tier--magenta">
+      <div class="tier-label">GCP Micro VMs</div>
+      <div class="tier-boxes">
+        <div class="box">
+          <span class="box-title">PicoClaw</span>
+          <span class="box-detail">Bot @a</span>
+        </div>
+        <div class="box">
+          <span class="box-title">PicoClaw</span>
+          <span class="box-detail">Bot @b</span>
+        </div>
+        <div class="box">
+          <span class="box-title">PicoClaw</span>
+          <span class="box-detail">Bot @n...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow">&#x25BC;</div>
+
+    <!-- Tier 4: Telegram -->
+    <div class="tier tier--cyan">
+      <div class="tier-label telegram-label">Telegram</div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .architecture {
+    padding: var(--section-padding);
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .architecture :global(h2) {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .tier {
+    width: 100%;
+    border: 1px solid var(--color-border);
+    clip-path: var(--clip-corner);
+    padding: 1.5rem;
+    background: var(--color-bg-card);
+  }
+
+  .tier--cyan {
+    border-color: var(--color-cyan);
+    box-shadow: inset 0 0 30px rgba(0, 240, 255, 0.03);
+  }
+
+  .tier--yellow {
+    border-color: var(--color-yellow);
+    box-shadow: inset 0 0 30px rgba(252, 238, 9, 0.03);
+  }
+
+  .tier--magenta {
+    border-color: var(--color-magenta);
+    box-shadow: inset 0 0 30px rgba(255, 45, 111, 0.03);
+  }
+
+  .tier-label {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .tier--cyan .tier-label   { color: var(--color-cyan); }
+  .tier--yellow .tier-label  { color: var(--color-yellow); }
+  .tier--magenta .tier-label { color: var(--color-magenta); }
+
+  .telegram-label {
+    margin-bottom: 0;
+    font-size: 1.2rem;
+  }
+
+  .tier-boxes {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .box {
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    padding: 0.8rem 1.2rem;
+    clip-path: var(--clip-corner-sm);
+    text-align: center;
+    min-width: 160px;
+    flex: 1;
+    max-width: 220px;
+  }
+
+  .box--wide {
+    max-width: 400px;
+  }
+
+  .box-title {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    color: var(--color-white);
+    margin-bottom: 0.3rem;
+  }
+
+  .box-detail {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+  }
+
+  .arrow {
+    font-size: 1.5rem;
+    color: var(--color-muted);
+    padding: 0.5rem 0;
+    line-height: 1;
+  }
+</style>

@@ -1,0 +1,118 @@
+/* ============================================================
+   ClawChain — Cyberpunk 2077 Design System
+   ============================================================ */
+
+/* --- Design Tokens --- */
+:root {
+  --color-bg:         #0a0a0a;
+  --color-bg-surface: #111111;
+  --color-bg-card:    #1a1a1a;
+  --color-cyan:       #00f0ff;
+  --color-magenta:    #ff2d6f;
+  --color-yellow:     #fcee09;
+  --color-white:      #e0e0e0;
+  --color-muted:      #999999;
+  --color-border:     #2a2a2a;
+
+  --glow-cyan:    0 0 10px #00f0ff, 0 0 40px rgba(0, 240, 255, 0.2);
+  --glow-magenta: 0 0 10px #ff2d6f, 0 0 40px rgba(255, 45, 111, 0.2);
+  --glow-yellow:  0 0 10px #fcee09, 0 0 40px rgba(252, 238, 9, 0.2);
+
+  --font-heading: 'Orbitron', sans-serif;
+  --font-body:    'Rajdhani', sans-serif;
+  --font-mono:    'Share Tech Mono', monospace;
+
+  --section-padding: clamp(2rem, 4vw, 4rem) clamp(1rem, 5vw, 4rem);
+
+  --clip-corner: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+  --clip-corner-sm: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+}
+
+/* --- Reset --- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: var(--color-white);
+  background: var(--color-bg);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: var(--color-cyan);
+  text-decoration: none;
+  transition: color 0.2s, text-shadow 0.2s;
+}
+
+a:hover {
+  text-shadow: var(--glow-cyan);
+}
+
+/* --- Typography --- */
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+}
+
+/* --- Utility --- */
+.neon-cyan    { color: var(--color-cyan);    text-shadow: var(--glow-cyan); }
+.neon-magenta { color: var(--color-magenta); text-shadow: var(--glow-magenta); }
+.neon-yellow  { color: var(--color-yellow);  text-shadow: var(--glow-yellow); }
+
+/* --- Keyframe Animations --- */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes glitch-1 {
+    0%   { clip-path: inset(40% 0 61% 0); transform: translate(-2px, -1px); }
+    20%  { clip-path: inset(92% 0 1% 0);  transform: translate(1px, 2px);  }
+    40%  { clip-path: inset(43% 0 1% 0);  transform: translate(-1px, 3px); }
+    60%  { clip-path: inset(25% 0 58% 0); transform: translate(3px, 1px);  }
+    80%  { clip-path: inset(54% 0 7% 0);  transform: translate(-3px, -2px);}
+    100% { clip-path: inset(58% 0 43% 0); transform: translate(2px, -1px); }
+  }
+
+  @keyframes glitch-2 {
+    0%   { clip-path: inset(65% 0 13% 0); transform: translate(3px, 2px);  }
+    20%  { clip-path: inset(15% 0 72% 0); transform: translate(-2px, -1px);}
+    40%  { clip-path: inset(81% 0 5% 0);  transform: translate(1px, -2px); }
+    60%  { clip-path: inset(37% 0 52% 0); transform: translate(-3px, 1px); }
+    80%  { clip-path: inset(4% 0 81% 0);  transform: translate(2px, 3px);  }
+    100% { clip-path: inset(50% 0 30% 0); transform: translate(-1px, -3px);}
+  }
+
+  @keyframes scan {
+    0%   { background-position: 0 -100%; }
+    100% { background-position: 0 100%; }
+  }
+
+  @keyframes flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+      opacity: 1;
+    }
+    20%, 24%, 55% {
+      opacity: 0.6;
+    }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.6; }
+    50%      { opacity: 1; }
+  }
+}

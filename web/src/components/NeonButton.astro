@@ -1,0 +1,56 @@
+---
+interface Props {
+  href: string;
+  label: string;
+  color?: 'cyan' | 'magenta';
+}
+
+const { href, label, color = 'cyan' } = Astro.props;
+---
+
+<a href={href} class={`neon-btn neon-btn--${color}`} target="_blank" rel="noopener noreferrer">
+  {label}
+</a>
+
+<style>
+  .neon-btn {
+    display: inline-block;
+    padding: 0.8rem 2rem;
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    text-decoration: none;
+    clip-path: var(--clip-corner-sm);
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .neon-btn--cyan {
+    color: var(--color-cyan);
+    background: rgba(0, 240, 255, 0.08);
+    border: 1px solid var(--color-cyan);
+    box-shadow: var(--glow-cyan);
+  }
+
+  .neon-btn--cyan:hover {
+    background: rgba(0, 240, 255, 0.15);
+    box-shadow: 0 0 15px #00f0ff, 0 0 60px rgba(0, 240, 255, 0.3);
+    transform: scale(1.03);
+    text-shadow: var(--glow-cyan);
+  }
+
+  .neon-btn--magenta {
+    color: var(--color-magenta);
+    background: rgba(255, 45, 111, 0.08);
+    border: 1px solid var(--color-magenta);
+    box-shadow: var(--glow-magenta);
+  }
+
+  .neon-btn--magenta:hover {
+    background: rgba(255, 45, 111, 0.15);
+    box-shadow: 0 0 15px #ff2d6f, 0 0 60px rgba(255, 45, 111, 0.3);
+    transform: scale(1.03);
+    text-shadow: var(--glow-magenta);
+  }
+</style>

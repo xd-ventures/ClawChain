@@ -1,0 +1,81 @@
+<footer class="footer">
+  <div class="footer-content">
+    <p class="hackathon">
+      Forged at <a href="https://luma.com/HACKWARSAW" target="_blank" rel="noopener noreferrer">Blockchain Hack Warsaw</a>,
+      organized by <a href="https://pl.superteam.fun/" target="_blank" rel="noopener noreferrer">Superteam Poland</a> &#x1F1F5;&#x1F1F1;
+      <br />
+      Preparing for the <a href="https://colosseum.com/" target="_blank" rel="noopener noreferrer">Colosseum</a> Hackathon
+    </p>
+    <div class="footer-links">
+      <a href="https://github.com/xd-ventures" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <span class="sep">&middot;</span>
+      <a href="https://xd.ventures" target="_blank" rel="noopener noreferrer">xd.ventures</a>
+      <span class="sep">&middot;</span>
+      <span class="license">MIT License</span>
+    </div>
+    <p class="copyright">&copy; 2026 ClawChain. All rights reserved.</p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid transparent;
+    border-image: linear-gradient(90deg, var(--color-cyan), var(--color-magenta)) 1;
+    padding: 3rem clamp(1rem, 5vw, 4rem);
+    text-align: center;
+  }
+
+  .footer-content {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .hackathon {
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    color: var(--color-muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .hackathon a {
+    color: var(--color-yellow);
+  }
+
+  .hackathon a:hover {
+    text-shadow: var(--glow-yellow);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 0.8rem;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .footer-links a {
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    color: var(--color-cyan);
+    text-decoration: none;
+  }
+
+  .footer-links a:hover {
+    text-shadow: var(--glow-cyan);
+  }
+
+  .sep {
+    color: var(--color-border);
+  }
+
+  .license {
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    color: var(--color-muted);
+  }
+
+  .copyright {
+    font-size: 0.9rem;
+    color: var(--color-muted);
+  }
+</style>

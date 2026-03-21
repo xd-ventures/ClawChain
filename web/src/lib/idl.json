@@ -1,0 +1,996 @@
+{
+  "address": "C1nMit7QsTGXDxb3p5EdNGDjRLQE1yDPtebSo1DA3ejX",
+  "metadata": {
+    "name": "claw_chain",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "ClawChain - AI Agents as a Service on Solana"
+  },
+  "instructions": [
+    {
+      "name": "bill",
+      "discriminator": [
+        37,
+        50,
+        141,
+        86,
+        97,
+        228,
+        217,
+        79
+      ],
+      "accounts": [
+        {
+          "name": "user_bot",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  98,
+                  111,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user_bot.owner",
+                "account": "UserBot"
+              }
+            ]
+          }
+        },
+        {
+          "name": "operator_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  112,
+                  101,
+                  114,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "operator_config"
+          ]
+        },
+        {
+          "name": "treasury",
+          "writable": true,
+          "relations": [
+            "operator_config"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "deactivate",
+      "discriminator": [
+        44,
+        112,
+        33,
+        172,
+        113,
+        28,
+        142,
+        13
+      ],
+      "accounts": [
+        {
+          "name": "user_bot",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  98,
+                  111,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "signer": true,
+          "relations": [
+            "user_bot"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "deposit",
+      "discriminator": [
+        242,
+        35,
+        198,
+        137,
+        82,
+        225,
+        242,
+        182
+      ],
+      "accounts": [
+        {
+          "name": "user_bot",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  98,
+                  111,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "operator_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  112,
+                  101,
+                  114,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "initialize",
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "operator_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  112,
+                  101,
+                  114,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "treasury"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "billing_amount",
+          "type": "u64"
+        },
+        {
+          "name": "min_deposit",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "initialize_service_status",
+      "discriminator": [
+        82,
+        24,
+        169,
+        99,
+        101,
+        245,
+        136,
+        186
+      ],
+      "accounts": [
+        {
+          "name": "service_status",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  114,
+                  118,
+                  105,
+                  99,
+                  101,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  117,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "operator_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  112,
+                  101,
+                  114,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "operator_config"
+          ]
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "max_instances",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "lock_for_provisioning",
+      "discriminator": [
+        72,
+        17,
+        235,
+        96,
+        180,
+        239,
+        248,
+        228
+      ],
+      "accounts": [
+        {
+          "name": "user_bot",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  98,
+                  111,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user_bot.owner",
+                "account": "UserBot"
+              }
+            ]
+          }
+        },
+        {
+          "name": "operator_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  112,
+                  101,
+                  114,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "operator_config"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "refund_failed_provision",
+      "discriminator": [
+        171,
+        183,
+        144,
+        121,
+        163,
+        240,
+        11,
+        131
+      ],
+      "accounts": [
+        {
+          "name": "user_bot",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  98,
+                  111,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user_bot.owner",
+                "account": "UserBot"
+              }
+            ]
+          }
+        },
+        {
+          "name": "operator_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  112,
+                  101,
+                  114,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "operator_config"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "set_bot_handle",
+      "discriminator": [
+        17,
+        239,
+        28,
+        140,
+        79,
+        144,
+        39,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "user_bot",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  98,
+                  111,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user_bot.owner",
+                "account": "UserBot"
+              }
+            ]
+          }
+        },
+        {
+          "name": "operator_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  112,
+                  101,
+                  114,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "operator_config"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "bot_handle",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "update_service_status",
+      "discriminator": [
+        19,
+        100,
+        225,
+        205,
+        54,
+        74,
+        242,
+        60
+      ],
+      "accounts": [
+        {
+          "name": "service_status",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  114,
+                  118,
+                  105,
+                  99,
+                  101,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  117,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "operator_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  112,
+                  101,
+                  114,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "operator_config"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "active_instances",
+          "type": "u16"
+        },
+        {
+          "name": "accepting_new",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "withdraw_remaining",
+      "discriminator": [
+        68,
+        143,
+        141,
+        61,
+        147,
+        204,
+        19,
+        181
+      ],
+      "accounts": [
+        {
+          "name": "user_bot",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  98,
+                  111,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "user_bot"
+          ]
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "OperatorConfig",
+      "discriminator": [
+        56,
+        238,
+        78,
+        9,
+        49,
+        239,
+        154,
+        18
+      ]
+    },
+    {
+      "name": "ServiceStatus",
+      "discriminator": [
+        194,
+        160,
+        175,
+        102,
+        164,
+        74,
+        85,
+        43
+      ]
+    },
+    {
+      "name": "UserBot",
+      "discriminator": [
+        103,
+        154,
+        163,
+        234,
+        88,
+        72,
+        23,
+        223
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "DepositTooSmall",
+      "msg": "Deposit amount is below the minimum required"
+    },
+    {
+      "code": 6001,
+      "name": "BotHandleTooLong",
+      "msg": "Bot handle exceeds maximum length of 32 characters"
+    },
+    {
+      "code": 6002,
+      "name": "BotNotActive",
+      "msg": "Bot account is not active"
+    },
+    {
+      "code": 6003,
+      "name": "AlreadyInactive",
+      "msg": "Bot account is already inactive"
+    },
+    {
+      "code": 6004,
+      "name": "MustDeactivateFirst",
+      "msg": "Bot account must be deactivated before withdrawal"
+    },
+    {
+      "code": 6005,
+      "name": "InsufficientBalance",
+      "msg": "Insufficient balance for billing"
+    },
+    {
+      "code": 6006,
+      "name": "NothingToWithdraw",
+      "msg": "No balance available to withdraw"
+    },
+    {
+      "code": 6007,
+      "name": "AlreadyLocked",
+      "msg": "Bot provisioning is already locked"
+    },
+    {
+      "code": 6008,
+      "name": "NotInProvisioningState",
+      "msg": "Bot is not in provisioning (locked) state"
+    },
+    {
+      "code": 6009,
+      "name": "BotNotReady",
+      "msg": "Bot is not ready for billing (still provisioning)"
+    }
+  ],
+  "types": [
+    {
+      "name": "OperatorConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "docs": [
+              "The authority wallet that can call operator-only instructions (set_bot_handle, bill)."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "treasury",
+            "docs": [
+              "The wallet that receives billing payments."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "billing_amount",
+            "docs": [
+              "Billing amount per cycle in lamports."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "min_deposit",
+            "docs": [
+              "Minimum deposit required to create a bot account, in lamports."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump seed."
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ServiceStatus",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "active_instances",
+            "docs": [
+              "Number of currently active instances."
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "max_instances",
+            "docs": [
+              "Maximum instances the service supports."
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "accepting_new",
+            "docs": [
+              "Whether the service is accepting new signups."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "last_updated",
+            "docs": [
+              "Unix timestamp of last update."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump seed."
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UserBot",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "docs": [
+              "The user's wallet address (owner of this bot account)."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "bot_handle",
+            "docs": [
+              "Telegram bot handle. Empty string means not yet provisioned."
+            ],
+            "type": "string"
+          },
+          {
+            "name": "is_active",
+            "docs": [
+              "Whether the bot is active."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "created_at",
+            "docs": [
+              "Timestamp of account creation."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "last_billed_at",
+            "docs": [
+              "Timestamp of last billing event."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "total_deposited",
+            "docs": [
+              "Total amount deposited over lifetime."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "total_billed",
+            "docs": [
+              "Total amount billed over lifetime."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump seed."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "provisioning_status",
+            "docs": [
+              "Provisioning status: 0=None, 1=Locked, 2=Ready, 3=Failed."
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
+}
