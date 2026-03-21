@@ -22,128 +22,129 @@ MAX_PROVISION_HEALTH_FAILURES = 20   # ~5 min at 15s polls
 MAX_RUNNING_HEALTH_FAILURES = 10     # ~2.5 min
 
 
+def watcher_tick(cfg: Config, db: DB, gcp, chain: ChainBackend):
+    """Single iteration of the watcher loop. Extracted for testability."""
+    all_bots = chain.fetch_all_user_bots()
+    on_chain = {b["owner"]: b for b in all_bots}
+
+    # --- CAPACITY CHECK ---
+    active_count = len(db.get_active_instances())
+    at_capacity = active_count >= cfg.max_instances
+
+    # --- PROVISION NEW BOTS ---
+    for bot in all_bots:
+        if not bot["is_active"] or bot["bot_handle"] != "":
+            continue
+        if bot.get("provisioning_status", 0) != 0:
+            continue
+        wallet = bot["owner"]
+        existing = db.get_instance_by_wallet(wallet)
+        if existing and existing["status"] in ("provisioning", "running"):
+            continue
+
+        if active_count >= cfg.max_instances:
+            log.info(f"At capacity ({active_count}/{cfg.max_instances}), skipping {wallet}")
+            continue
+
+        try:
+            chain.lock_for_provisioning(wallet)
+            log.info(f"Locked funds for provisioning: {wallet}")
+        except Exception as e:
+            log.error(f"Failed to lock funds for {wallet}: {e}")
+            continue
+
+        alloc = db.allocate_bot(wallet)
+        if alloc is None:
+            log.error("No available telegram bots in pool!")
+            continue
+        tg_id, tg_name, tg_token = alloc
+
+        vm_name = f"picoclaw-{wallet[:8].lower()}"
+        log.info(f"Provisioning VM {vm_name} for wallet {wallet} with bot @{tg_name}")
+
+        if gcp:
+            userdata = generate_cloud_init(cfg.openrouter_api_key, tg_token)
+            container_decl = generate_container_declaration(cfg.picoclaw_image)
+            try:
+                gcp.create_instance(vm_name, userdata, container_decl)
+            except Exception as e:
+                log.error(f"Failed to create VM {vm_name}: {e}")
+                db.release_bot(tg_id)
+                try:
+                    chain.refund_failed_provision(wallet)
+                except Exception as e2:
+                    log.error(f"Failed to refund {wallet} after VM creation failure: {e2}")
+                continue
+        else:
+            log.info(f"[DRY-RUN] Would create VM {vm_name}")
+
+        db.create_instance(wallet, tg_id, tg_name, vm_name, cfg.gcp_zone)
+        active_count += 1
+
+    # --- CHECK PROVISIONING INSTANCES ---
+    for inst in db.get_active_instances():
+        if inst["status"] == "provisioning":
+            _handle_provisioning(cfg, db, gcp, chain, inst)
+
+    # --- HEALTH CHECK RUNNING INSTANCES ---
+    for inst in db.get_active_instances():
+        if inst["status"] == "running":
+            _handle_running_health(db, gcp, inst)
+
+    # --- HANDLE REACTIVATION ---
+    for bot in all_bots:
+        if not bot["is_active"] or bot["bot_handle"] == "":
+            continue
+        wallet = bot["owner"]
+        inst = db.get_instance_by_wallet(wallet)
+        if inst and inst["status"] == "stopped":
+            if len(db.get_active_instances()) >= cfg.max_instances:
+                continue
+            alloc = db.allocate_bot(wallet)
+            if alloc is None:
+                log.error("No available telegram bots for reactivation!")
+                continue
+            tg_id, tg_name, tg_token = alloc
+            vm_name = f"picoclaw-{wallet[:8].lower()}-r"
+            log.info(f"Re-provisioning VM {vm_name} for reactivated wallet {wallet}")
+
+            if gcp:
+                userdata = generate_cloud_init(cfg.openrouter_api_key, tg_token)
+                container_decl = generate_container_declaration(cfg.picoclaw_image)
+                try:
+                    gcp.create_instance(vm_name, userdata, container_decl)
+                except Exception as e:
+                    log.error(f"Failed to re-provision VM {vm_name}: {e}")
+                    db.release_bot(tg_id)
+                    continue
+            else:
+                log.info(f"[DRY-RUN] Would create VM {vm_name}")
+
+            db.create_instance(wallet, tg_id, tg_name, vm_name, cfg.gcp_zone)
+
+    # --- TEARDOWN DEACTIVATED BOTS ---
+    for inst in db.get_active_instances():
+        wallet = inst["wallet_pubkey"]
+        chain_bot = on_chain.get(wallet)
+        if chain_bot and not chain_bot["is_active"]:
+            _teardown_instance(db, gcp, inst)
+
+    # --- UPDATE ON-CHAIN SERVICE STATUS ---
+    try:
+        active_count = len(db.get_active_instances())
+        accepting = active_count < cfg.max_instances
+        chain.update_service_status(active_count, accepting)
+    except Exception as e:
+        log.warning(f"Failed to update service status on-chain: {e}")
+
+
 async def watcher_loop(cfg: Config, db: DB, gcp, chain: ChainBackend):
     """Poll chain for new deposits and state changes."""
     while True:
         try:
-            all_bots = chain.fetch_all_user_bots()
-            on_chain = {b["owner"]: b for b in all_bots}
-
-            # --- CAPACITY CHECK ---
-            active_count = len(db.get_active_instances())
-            at_capacity = active_count >= cfg.max_instances
-
-            # --- PROVISION NEW BOTS ---
-            for bot in all_bots:
-                if not bot["is_active"] or bot["bot_handle"] != "":
-                    continue
-                if bot.get("provisioning_status", 0) != 0:
-                    continue  # Already locked or in progress
-                wallet = bot["owner"]
-                existing = db.get_instance_by_wallet(wallet)
-                if existing and existing["status"] in ("provisioning", "running"):
-                    continue
-
-                if at_capacity:
-                    log.info(f"At capacity ({active_count}/{cfg.max_instances}), skipping {wallet}")
-                    continue
-
-                # Lock funds on-chain before provisioning
-                try:
-                    chain.lock_for_provisioning(wallet)
-                    log.info(f"Locked funds for provisioning: {wallet}")
-                except Exception as e:
-                    log.error(f"Failed to lock funds for {wallet}: {e}")
-                    continue
-
-                alloc = db.allocate_bot(wallet)
-                if alloc is None:
-                    log.error("No available telegram bots in pool!")
-                    continue
-                tg_id, tg_name, tg_token = alloc
-
-                vm_name = f"picoclaw-{wallet[:8].lower()}"
-                log.info(f"Provisioning VM {vm_name} for wallet {wallet} with bot @{tg_name}")
-
-                if gcp:
-                    userdata = generate_cloud_init(cfg.openrouter_api_key, tg_token)
-                    container_decl = generate_container_declaration(cfg.picoclaw_image)
-                    try:
-                        gcp.create_instance(vm_name, userdata, container_decl)
-                    except Exception as e:
-                        log.error(f"Failed to create VM {vm_name}: {e}")
-                        db.release_bot(tg_id)
-                        # Refund since VM creation failed
-                        try:
-                            chain.refund_failed_provision(wallet)
-                        except Exception as e2:
-                            log.error(f"Failed to refund {wallet} after VM creation failure: {e2}")
-                        continue
-                else:
-                    log.info(f"[DRY-RUN] Would create VM {vm_name}")
-
-                db.create_instance(wallet, tg_id, tg_name, vm_name, cfg.gcp_zone)
-                active_count += 1
-
-            # --- CHECK PROVISIONING INSTANCES ---
-            for inst in db.get_active_instances():
-                if inst["status"] == "provisioning":
-                    _handle_provisioning(cfg, db, gcp, chain, inst)
-
-            # --- HEALTH CHECK RUNNING INSTANCES ---
-            for inst in db.get_active_instances():
-                if inst["status"] == "running":
-                    _handle_running_health(db, gcp, inst)
-
-            # --- HANDLE REACTIVATION ---
-            for bot in all_bots:
-                if not bot["is_active"] or bot["bot_handle"] == "":
-                    continue
-                wallet = bot["owner"]
-                inst = db.get_instance_by_wallet(wallet)
-                if inst and inst["status"] == "stopped":
-                    if at_capacity:
-                        continue
-                    alloc = db.allocate_bot(wallet)
-                    if alloc is None:
-                        log.error("No available telegram bots for reactivation!")
-                        continue
-                    tg_id, tg_name, tg_token = alloc
-                    vm_name = f"picoclaw-{wallet[:8].lower()}-r"
-                    log.info(f"Re-provisioning VM {vm_name} for reactivated wallet {wallet}")
-
-                    if gcp:
-                        userdata = generate_cloud_init(cfg.openrouter_api_key, tg_token)
-                        container_decl = generate_container_declaration(cfg.picoclaw_image)
-                        try:
-                            gcp.create_instance(vm_name, userdata, container_decl)
-                        except Exception as e:
-                            log.error(f"Failed to re-provision VM {vm_name}: {e}")
-                            db.release_bot(tg_id)
-                            continue
-                    else:
-                        log.info(f"[DRY-RUN] Would create VM {vm_name}")
-
-                    db.create_instance(wallet, tg_id, tg_name, vm_name, cfg.gcp_zone)
-
-            # --- TEARDOWN DEACTIVATED BOTS ---
-            for inst in db.get_active_instances():
-                wallet = inst["wallet_pubkey"]
-                chain_bot = on_chain.get(wallet)
-                if chain_bot and not chain_bot["is_active"]:
-                    _teardown_instance(db, gcp, inst)
-
-            # --- UPDATE ON-CHAIN SERVICE STATUS ---
-            try:
-                active_count = len(db.get_active_instances())
-                accepting = active_count < cfg.max_instances
-                chain.update_service_status(active_count, accepting)
-            except Exception as e:
-                log.warning(f"Failed to update service status on-chain: {e}")
-
+            watcher_tick(cfg, db, gcp, chain)
         except Exception as e:
             log.exception(f"Watcher loop error: {e}")
-
         await asyncio.sleep(cfg.poll_interval_secs)
 
 

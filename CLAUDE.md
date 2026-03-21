@@ -46,6 +46,14 @@ SQLITE_DB_PATH=/tmp/test.db \
 python -m orchestrator.main
 ```
 
+### Orchestrator Tests (pytest)
+```bash
+cd orchestrator && pip install -r requirements.txt
+pytest -v                           # all 51 tests (~0.1s)
+pytest tests/test_db.py -v          # single module
+pytest tests/test_orchestrator.py -v  # integration tests only
+```
+
 ### Python Account Monitor
 ```bash
 cd monitor && pip install -r requirements.txt
