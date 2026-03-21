@@ -55,4 +55,8 @@ pub mod claw_chain {
     pub fn update_service_status(ctx: Context<UpdateServiceStatus>, active_instances: u16, accepting_new: bool) -> Result<()> {
         instructions::update_service_status::handle_update_service_status(ctx, active_instances, accepting_new)
     }
+
+    pub fn force_reset(ctx: Context<ForceReset>) -> Result<()> {
+        instructions::force_reset::handle_force_reset(ctx)
+    }
 }

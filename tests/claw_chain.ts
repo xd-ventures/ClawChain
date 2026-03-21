@@ -697,4 +697,125 @@ describe("claw_chain", () => {
       expect(err.error.errorCode.code).to.equal("NotInProvisioningState");
     }
   });
+
+  // =========================================================================
+  // Test 26: Force reset returns funds and resets state
+  // =========================================================================
+  it("force reset returns funds and resets state", async () => {
+    // User2 is active with provisioningStatus=0, has balance from test 21
+    const [pda] = userBotPda(user2.publicKey);
+
+    // First set a bot handle so we can verify it gets cleared
+    await program.methods
+      .setBotHandle("@reset_test_bot")
+      .accountsStrict({
+        userBot: pda,
+        operatorConfig: operatorConfigPda,
+        authority: operator.publicKey,
+      })
+      .signers([operator])
+      .rpc();
+
+    const userBalBefore = await getBalance(user2.publicKey);
+    const pdaBalBefore = await getBalance(pda);
+
+    await program.methods
+      .forceReset()
+      .accountsStrict({
+        userBot: pda,
+        owner: user2.publicKey,
+        operatorConfig: operatorConfigPda,
+        authority: operator.publicKey,
+      })
+      .signers([operator])
+      .rpc();
+
+    const userBot = await program.account.userBot.fetch(pda);
+    expect(userBot.isActive).to.be.false;
+    expect(userBot.provisioningStatus).to.equal(0);
+    expect(userBot.botHandle).to.equal("");
+
+    // Funds returned to owner
+    const userBalAfter = await getBalance(user2.publicKey);
+    const pdaBalAfter = await getBalance(pda);
+    const rentExempt = await connection.getMinimumBalanceForRentExemption(
+      (await connection.getAccountInfo(pda))!.data.length
+    );
+    expect(pdaBalAfter).to.equal(rentExempt);
+    expect(userBalAfter).to.be.greaterThan(userBalBefore);
+  });
+
+  // =========================================================================
+  // Test 27: Non-operator cannot force reset
+  // =========================================================================
+  it("non-operator cannot force reset", async () => {
+    // Reactivate user2 first
+    const [pda] = userBotPda(user2.publicKey);
+
+    await program.methods
+      .deposit(new anchor.BN(50_000_000))
+      .accountsStrict({
+        userBot: pda,
+        operatorConfig: operatorConfigPda,
+        owner: user2.publicKey,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .signers([user2])
+      .rpc();
+
+    try {
+      await program.methods
+        .forceReset()
+        .accountsStrict({
+          userBot: pda,
+          owner: user2.publicKey,
+          operatorConfig: operatorConfigPda,
+          authority: user1.publicKey,
+        })
+        .signers([user1])
+        .rpc();
+      expect.fail("should have thrown");
+    } catch (err: any) {
+      expect(err).to.exist;
+    }
+  });
+
+  // =========================================================================
+  // Test 28: Force reset works on any provisioning status
+  // =========================================================================
+  it("force reset works on any provisioning status", async () => {
+    // User2 is active from test 27 deposit, provisioningStatus=0
+    const [pda] = userBotPda(user2.publicKey);
+
+    // Lock it
+    await program.methods
+      .lockForProvisioning()
+      .accountsStrict({
+        userBot: pda,
+        operatorConfig: operatorConfigPda,
+        authority: operator.publicKey,
+      })
+      .signers([operator])
+      .rpc();
+
+    let userBot = await program.account.userBot.fetch(pda);
+    expect(userBot.provisioningStatus).to.equal(1); // Locked
+
+    // Force reset from Locked state
+    await program.methods
+      .forceReset()
+      .accountsStrict({
+        userBot: pda,
+        owner: user2.publicKey,
+        operatorConfig: operatorConfigPda,
+        authority: operator.publicKey,
+      })
+      .signers([operator])
+      .rpc();
+
+    userBot = await program.account.userBot.fetch(pda);
+    expect(userBot.isActive).to.be.false;
+    expect(userBot.provisioningStatus).to.equal(0);
+    expect(userBot.botHandle).to.equal("");
+  });
 });

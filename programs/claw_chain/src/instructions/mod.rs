@@ -8,6 +8,7 @@ pub mod lock_for_provisioning;
 pub mod refund_failed_provision;
 pub mod initialize_service_status;
 pub mod update_service_status;
+pub mod force_reset;
 
 pub use initialize::*;
 pub use deposit::*;
@@ -19,3 +20,4 @@ pub use lock_for_provisioning::*;
 pub use refund_failed_provision::*;
 pub use initialize_service_status::*;
 pub use update_service_status::*;
+pub use force_reset::*;
