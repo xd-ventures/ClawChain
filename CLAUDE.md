@@ -19,7 +19,7 @@ Three main components:
 ### Solana Program (Anchor)
 ```bash
 anchor build                          # compile the program
-anchor test                           # run all 15 tests (starts local validator)
+anchor test                           # run all 25 tests (starts local validator)
 anchor deploy --provider.cluster devnet  # deploy to devnet
 anchor keys list                      # show program ID
 ```
