@@ -52,7 +52,7 @@ export function Dashboard() {
     );
   }
 
-  if (userBot.isActive && userBot.botHandle) {
+  if (userBot.isActive && userBot.botHandle && userBot.provisioningStatus === 2) {
     return (
       <div className="dashboard">
         <BotStatus userBot={userBot} onAction={userBot.refresh} />
@@ -61,7 +61,7 @@ export function Dashboard() {
     );
   }
 
-  if (userBot.isActive && !userBot.botHandle) {
+  if (userBot.isActive && userBot.provisioningStatus < 2) {
     return (
       <div className="dashboard">
         <h2 className="dashboard-title">Setting up your bot...</h2>
@@ -88,6 +88,9 @@ export function Dashboard() {
       </p>
       <div className="dashboard-actions">
         <WithdrawButton onAction={userBot.refresh} />
+      </div>
+      <div className="dashboard-reactivate">
+        <p className="dashboard-hint">Want to start a new bot?</p>
         <DepositForm onDeposited={userBot.refresh} label="Reactivate" />
       </div>
       <ServiceInfo status={serviceStatus} />
