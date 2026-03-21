@@ -15,6 +15,7 @@ orchestrator/telegram_bots.txt
 orchestrator/*.db
 __pycache__
 **/__pycache__
+orchestrator/logs/
 
 # Keypairs — never commit
 *-keypair.json

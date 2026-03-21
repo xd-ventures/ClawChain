@@ -11,10 +11,6 @@ from .chain import ChainBackend, SolanaBackend, MockBackend
 from .cloud_init import generate_cloud_init, generate_container_declaration
 from .bot_pool import load_bot_pool
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-)
 log = logging.getLogger("orchestrator")
 
 # Health check thresholds
@@ -319,7 +315,41 @@ async def run():
     )
 
 
+def setup_logging():
+    """Configure logging to both console and timestamped log file."""
+    from datetime import datetime
+    from pathlib import Path
+
+    log_dir = Path(__file__).parent / "logs"
+    log_dir.mkdir(exist_ok=True)
+    timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    log_file = log_dir / f"{timestamp}.log"
+
+    root = logging.getLogger()
+    root.setLevel(logging.INFO)
+
+    # Console: orchestrator messages only, no httpx noise
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    console.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
+    console.addFilter(lambda r: not r.name.startswith("httpx") and not r.name.startswith("httpcore"))
+    root.addHandler(console)
+
+    # File: everything including httpx (for debugging)
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
+    root.addHandler(file_handler)
+
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
+
+    return log_file
+
+
 def main():
+    log_file = setup_logging()
+    log.info(f"Log file: {log_file}")
     asyncio.run(run())
 
 
