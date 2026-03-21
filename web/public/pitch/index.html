@@ -70,18 +70,21 @@
       border-color: var(--color-yellow);
       color: var(--color-yellow);
     }
-    .reveal .demo-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0.5em;
-      margin: 0.8em 0;
-    }
-    .reveal .demo-grid img {
-      width: 100%;
+    .reveal .demo-full {
+      max-height: 55vh;
+      max-width: 90%;
+      margin: 0 auto;
       border: 1px solid rgba(0,240,255,0.3);
-      border-radius: 4px;
+      border-radius: 6px;
+      display: block;
     }
-    .reveal .demo-grid .wide { grid-column: span 2; }
+    .reveal .demo-caption {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75em;
+      color: var(--color-cyan);
+      text-align: center;
+      margin-top: 0.5em;
+    }
     .reveal .flow-step {
       font-family: 'Share Tech Mono', monospace;
       font-size: 0.8em;
@@ -164,58 +167,6 @@
       background: linear-gradient(90deg, var(--color-cyan), var(--color-magenta));
       margin: 0.8em 0;
     }
-    .reveal .demo-grid-large {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 0.8em;
-      margin: 0.5em 0;
-    }
-    .reveal .demo-item {
-      cursor: pointer;
-      position: relative;
-      border: 1px solid rgba(0,240,255,0.3);
-      border-radius: 4px;
-      overflow: hidden;
-      transition: border-color 0.3s, box-shadow 0.3s;
-    }
-    .reveal .demo-item:hover {
-      border-color: var(--color-cyan);
-      box-shadow: 0 0 15px rgba(0,240,255,0.3);
-    }
-    .reveal .demo-item img {
-      width: 100%;
-      display: block;
-    }
-    .reveal .demo-label {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(0,0,0,0.75);
-      color: var(--color-cyan);
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.65em;
-      padding: 0.3em 0.6em;
-      text-align: center;
-    }
-    #lightbox {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      background: rgba(0,0,0,0.92);
-      cursor: pointer;
-      justify-content: center;
-      align-items: center;
-    }
-    #lightbox.active { display: flex; }
-    #lightbox img {
-      max-width: 90vw;
-      max-height: 90vh;
-      border: 2px solid var(--color-cyan);
-      border-radius: 6px;
-      box-shadow: var(--glow-cyan);
-    }
   </style>
 </head>
 <body>
@@ -276,34 +227,31 @@
         </div>
       </section>
 
-      <!-- SLIDE 4b: Demo Screenshots -->
+      <!-- SLIDE 4b: Demo Screenshots (vertical navigation) -->
       <section>
-        <h2>Live Demo</h2>
-        <p class="muted">Click any screenshot to zoom in</p>
-        <div class="demo-grid-large">
-          <div class="demo-item" onclick="openLightbox(this)">
-            <img src="img/03-deposit-click.jpg" alt="Deposit">
-            <span class="demo-label">Deposit SOL</span>
-          </div>
-          <div class="demo-item" onclick="openLightbox(this)">
-            <img src="img/05-setting-up-bot.jpg" alt="Setting up">
-            <span class="demo-label">Provisioning</span>
-          </div>
-          <div class="demo-item" onclick="openLightbox(this)">
-            <img src="img/06-bot-is-live.jpg" alt="Bot live">
-            <span class="demo-label">Bot is Live</span>
-          </div>
-          <div class="demo-item" onclick="openLightbox(this)">
-            <img src="img/07-telegram-chat.jpg" alt="Telegram">
-            <span class="demo-label">Telegram Chat</span>
-          </div>
-        </div>
+        <section>
+          <h2>Live Demo</h2>
+          <p class="muted" style="margin-bottom:0.5em;">&darr; Navigate down to see each step</p>
+          <img class="demo-full" src="img/03-deposit-click.jpg" alt="Deposit">
+          <p class="demo-caption">Step 1: Deposit SOL</p>
+        </section>
+        <section>
+          <img class="demo-full" src="img/04-phantom-wallet.jpg" alt="Phantom confirmation">
+          <p class="demo-caption">Step 2: Confirm in Phantom</p>
+        </section>
+        <section>
+          <img class="demo-full" src="img/05-setting-up-bot.jpg" alt="Setting up bot">
+          <p class="demo-caption">Step 3: Provisioning VM...</p>
+        </section>
+        <section>
+          <img class="demo-full" src="img/06-bot-is-live.jpg" alt="Bot is live">
+          <p class="demo-caption">Step 4: Bot is Live!</p>
+        </section>
+        <section>
+          <img class="demo-full" src="img/07-telegram-chat.jpg" alt="Telegram chat">
+          <p class="demo-caption">Step 5: Chat on Telegram</p>
+        </section>
       </section>
-
-      <!-- Lightbox overlay -->
-      <div id="lightbox" onclick="closeLightbox()">
-        <img id="lightbox-img" src="" alt="">
-      </div>
 
       <!-- SLIDE 5: Roadmap -->
       <section>
@@ -396,19 +344,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
-  <script>
-    function openLightbox(el) {
-      var img = el.querySelector('img');
-      document.getElementById('lightbox-img').src = img.src;
-      document.getElementById('lightbox').classList.add('active');
-    }
-    function closeLightbox() {
-      document.getElementById('lightbox').classList.remove('active');
-    }
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') closeLightbox();
-    });
-  </script>
   <script>
     Reveal.initialize({
       hash: true,
