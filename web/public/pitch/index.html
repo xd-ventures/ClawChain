@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClawChain — Pitch Deck</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-bg: #0a0a0a;
+      --color-cyan: #00f0ff;
+      --color-magenta: #ff2d6f;
+      --color-yellow: #fcee09;
+      --color-white: #e0e0e0;
+      --color-muted: #999;
+      --glow-cyan: 0 0 10px #00f0ff, 0 0 40px rgba(0,240,255,0.2);
+      --glow-magenta: 0 0 10px #ff2d6f, 0 0 40px rgba(255,45,111,0.2);
+      --glow-yellow: 0 0 10px #fcee09, 0 0 40px rgba(252,238,9,0.2);
+    }
+
+    .reveal { font-family: 'Rajdhani', sans-serif; color: var(--color-white); }
+    .reveal .slides { text-align: left; }
+    .reveal .slide-background { background: var(--color-bg) !important; }
+    .reveal h1, .reveal h2, .reveal h3 {
+      font-family: 'Orbitron', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .reveal h1 { color: var(--color-cyan); text-shadow: var(--glow-cyan); font-size: 2.8em; }
+    .reveal h2 { color: var(--color-cyan); text-shadow: var(--glow-cyan); font-size: 1.6em; margin-bottom: 0.6em; }
+    .reveal h3 { color: var(--color-magenta); font-size: 1.1em; margin-top: 0.8em; }
+    .reveal p, .reveal li { font-size: 0.85em; line-height: 1.6; }
+    .reveal ul { list-style: none; padding: 0; }
+    .reveal li { padding-left: 1.2em; position: relative; margin-bottom: 0.4em; }
+    .reveal li::before { content: '▸'; position: absolute; left: 0; color: var(--color-cyan); }
+    .reveal code, .reveal .mono { font-family: 'Share Tech Mono', monospace; }
+    .reveal .neon-cyan { color: var(--color-cyan); text-shadow: var(--glow-cyan); }
+    .reveal .neon-magenta { color: var(--color-magenta); text-shadow: var(--glow-magenta); }
+    .reveal .neon-yellow { color: var(--color-yellow); text-shadow: var(--glow-yellow); }
+    .reveal .muted { color: var(--color-muted); font-size: 0.75em; }
+    .reveal .tagline { font-size: 1.2em; color: var(--color-white); font-weight: 500; margin: 0.5em 0; }
+    .reveal .big-question {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2em;
+      color: var(--color-magenta);
+      text-shadow: var(--glow-magenta);
+      text-align: center;
+      margin: 1em 0;
+    }
+    .reveal .badge {
+      display: inline-block;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7em;
+      padding: 0.2em 0.7em;
+      border: 1px solid var(--color-cyan);
+      border-radius: 3px;
+      color: var(--color-cyan);
+      margin: 0.2em 0.3em;
+    }
+    .reveal .badge-magenta {
+      border-color: var(--color-magenta);
+      color: var(--color-magenta);
+    }
+    .reveal .badge-yellow {
+      border-color: var(--color-yellow);
+      color: var(--color-yellow);
+    }
+    .reveal .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5em;
+      margin: 0.8em 0;
+    }
+    .reveal .demo-grid img {
+      width: 100%;
+      border: 1px solid rgba(0,240,255,0.3);
+      border-radius: 4px;
+    }
+    .reveal .demo-grid .wide { grid-column: span 2; }
+    .reveal .flow-step {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8em;
+      padding: 0.3em 0;
+      color: var(--color-white);
+    }
+    .reveal .flow-step .num {
+      color: var(--color-cyan);
+      font-weight: bold;
+      margin-right: 0.5em;
+    }
+    .reveal .stat-row {
+      display: flex;
+      gap: 1.5em;
+      margin: 0.6em 0;
+      flex-wrap: wrap;
+    }
+    .reveal .stat {
+      text-align: center;
+    }
+    .reveal .stat-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.4em;
+      color: var(--color-cyan);
+      text-shadow: var(--glow-cyan);
+    }
+    .reveal .stat-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.6em;
+      color: var(--color-muted);
+      display: block;
+    }
+    .reveal .timeline {
+      display: flex;
+      gap: 1em;
+      margin: 0.8em 0;
+    }
+    .reveal .timeline-col {
+      flex: 1;
+      padding: 0.6em;
+      border: 1px solid rgba(0,240,255,0.2);
+      border-radius: 4px;
+      background: rgba(0,240,255,0.03);
+    }
+    .reveal .timeline-col h3 { margin-top: 0; font-size: 0.9em; }
+    .reveal .timeline-col li { font-size: 0.7em; }
+    .reveal .center { text-align: center; }
+    .reveal .pillars {
+      display: flex;
+      gap: 1em;
+      margin: 0.6em 0;
+    }
+    .reveal .pillar {
+      flex: 1;
+      text-align: center;
+      padding: 0.5em;
+      border: 1px solid rgba(255,45,111,0.3);
+      border-radius: 4px;
+    }
+    .reveal .pillar-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7em;
+      color: var(--color-magenta);
+      text-transform: uppercase;
+    }
+    .reveal .pillar-detail {
+      font-size: 0.65em;
+      color: var(--color-muted);
+      margin-top: 0.3em;
+    }
+    .reveal .closing-links {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85em;
+      margin-top: 1em;
+    }
+    .reveal .closing-links a { color: var(--color-cyan); }
+    .reveal .separator {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, var(--color-cyan), var(--color-magenta));
+      margin: 0.8em 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- SLIDE 1: Title -->
+      <section>
+        <div class="center">
+          <h1>ClawChain</h1>
+          <p class="tagline">AI Agents as a Service, powered by <span class="neon-yellow">Solana</span></p>
+          <hr class="separator">
+          <p class="muted" style="margin-top:1em;">Maciej Sawicki &mdash; Blockchain Hack Warsaw, March 2026</p>
+          <p class="muted">Forged at Superteam Poland &bull; Heading to Colosseum Hackathon</p>
+        </div>
+      </section>
+
+      <!-- SLIDE 2: The Problem -->
+      <section>
+        <div class="big-question">How do you trust a bot?</div>
+        <ul>
+          <li><span class="neon-magenta">No identity</span> &mdash; millions of bots on Telegram, Discord, WhatsApp. No way to verify who runs them, whether they're legit, or hold them accountable.</li>
+          <li><span class="neon-magenta">Infra overhead</span> &mdash; deploying your own agent requires servers, configs, subscriptions, credit cards &mdash; before it does anything useful.</li>
+          <li><span class="neon-magenta">No accountability</span> &mdash; anyone can spin up a bot and claim to be anything. No on-chain proof. No reputation trail.</li>
+        </ul>
+      </section>
+
+      <!-- SLIDE 3: The Vision -->
+      <section>
+        <h2>On-Chain Agent Identity</h2>
+        <p>What if every AI agent had a <span class="neon-cyan">cryptographic identity</span> on Solana?</p>
+        <ul>
+          <li><span class="neon-cyan">Verifiable identity</span> &mdash; prove a bot belongs to a specific wallet, cryptographically</li>
+          <li><span class="neon-cyan">Reputation systems</span> &mdash; on-chain history of agent behavior, uptime, interactions</li>
+          <li><span class="neon-cyan">Trust networks</span> &mdash; agents verify each other before transacting</li>
+          <li><span class="neon-cyan">Agent economy</span> &mdash; bots discover, hire, and pay each other via Solana</li>
+        </ul>
+        <p class="muted" style="margin-top:0.8em;">Wallet &rarr; On-chain registry &rarr; Bot identity &rarr; Reputation layer</p>
+      </section>
+
+      <!-- SLIDE 4: The MVP -->
+      <section>
+        <h2>Working MVP</h2>
+        <p>Deposit SOL &rarr; Get an AI agent on Telegram &rarr; <span class="neon-cyan">Chat.</span></p>
+
+        <div class="flow-step"><span class="num">1</span> Deposit SOL to ClawChain program</div>
+        <div class="flow-step"><span class="num">2</span> Orchestrator locks funds, spins up PicoClaw VM</div>
+        <div class="flow-step"><span class="num">3</span> Health check passes &rarr; bot handle written on-chain</div>
+        <div class="flow-step"><span class="num">4</span> Chat on Telegram. Pay-as-you-run.</div>
+        <div class="flow-step"><span class="num">5</span> Stop flag on-chain &rarr; VM stops, refund available</div>
+
+        <div style="margin-top:0.6em;">
+          <span class="badge">10 instructions</span>
+          <span class="badge">3 PDAs</span>
+          <span class="badge badge-magenta">28 on-chain tests</span>
+          <span class="badge badge-magenta">51 orchestrator tests</span>
+          <span class="badge badge-yellow">Devnet E2E</span>
+        </div>
+
+        <div class="demo-grid" style="margin-top:0.6em;">
+          <img src="img/03-deposit-click.jpg" alt="Deposit">
+          <img src="img/05-setting-up-bot.jpg" alt="Setting up">
+          <img src="img/06-bot-is-live.jpg" alt="Bot live">
+          <img src="img/07-telegram-chat.jpg" alt="Telegram">
+        </div>
+      </section>
+
+      <!-- SLIDE 5: Roadmap -->
+      <section>
+        <h2>Roadmap</h2>
+        <div class="timeline">
+          <div class="timeline-col">
+            <h3 class="neon-cyan">Now (MVP)</h3>
+            <ul>
+              <li>Solana program + orchestrator</li>
+              <li>Escrow-like provisioning</li>
+              <li>Web UI + Telegram bot</li>
+              <li>Container-Optimized OS</li>
+            </ul>
+          </div>
+          <div class="timeline-col">
+            <h3 class="neon-yellow">Next</h3>
+            <ul>
+              <li>Custom agent configs</li>
+              <li>Multi-channel (Discord, WhatsApp)</li>
+              <li>Agent identity marketplace</li>
+              <li>cf. ERC-8004 (20k+ agents on ETH)</li>
+            </ul>
+          </div>
+          <div class="timeline-col">
+            <h3 class="neon-magenta">Future</h3>
+            <ul>
+              <li>Solana Seeker + TEEPIN</li>
+              <li>Hardware TEE attestation</li>
+              <li>Confidential computing (SGX/TDX)</li>
+              <li>Agent-to-agent commerce</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 6: Market + Founder -->
+      <section>
+        <h2>Market & Founder</h2>
+
+        <div class="stat-row">
+          <div class="stat">
+            <span class="stat-value">$199B</span>
+            <span class="stat-label">Agentic AI by 2034</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">70%</span>
+            <span class="stat-label">AI agents choose Solana</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">Mar '26</span>
+            <span class="stat-label">Alchemy x402 + Stripe/Tempo</span>
+          </div>
+        </div>
+
+        <h3>Revenue</h3>
+        <p style="font-size:0.8em;">Margin on compute (SOL/h). Zero residual cost &mdash; VM dies when user stops. Scale: marketplace take rate + reputation-as-a-service.</p>
+
+        <h3>Founder Fit</h3>
+        <div class="pillars">
+          <div class="pillar">
+            <div class="pillar-title">Web3</div>
+            <div class="pillar-detail">Chorus One<br>Validator ops</div>
+          </div>
+          <div class="pillar">
+            <div class="pillar-title">AI/ML</div>
+            <div class="pillar-detail">deepsense.ai<br>Platform eng</div>
+          </div>
+          <div class="pillar">
+            <div class="pillar-title">Infra</div>
+            <div class="pillar-detail">Telecom billing<br>GCP Architect, CKAD</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 7: Closing -->
+      <section>
+        <div class="center">
+          <h1>ClawChain</h1>
+          <p class="tagline" style="max-width:700px;margin:0.5em auto;">Cryptographic identity for AI agents.<br>Infrastructure to run them.<br><span class="neon-yellow">Solana to pay for them.</span></p>
+          <hr class="separator">
+          <div class="closing-links">
+            <p><a href="https://clawchain.xd.ventures">clawchain.xd.ventures</a></p>
+            <p><a href="https://x.com/ClawChain_0x">@ClawChain_0x</a></p>
+            <p><a href="https://github.com/xd-ventures/ClawChain">github.com/xd-ventures/ClawChain</a></p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      controls: true,
+      progress: true,
+      center: true,
+      transition: 'fade',
+      backgroundTransition: 'none',
+      width: 1200,
+      height: 700,
+    });
+  </script>
+</body>
+</html>
