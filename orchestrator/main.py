@@ -35,8 +35,10 @@ def watcher_tick(cfg: Config, db: DB, gcp, chain: ChainBackend):
     for bot in all_bots:
         if not bot["is_active"] or bot["bot_handle"] != "":
             continue
-        if bot.get("provisioning_status", 0) != 0:
-            continue
+        # Skip if already ready/failed (only provision if None or Locked-but-no-instance)
+        ps = bot.get("provisioning_status", 0)
+        if ps >= 2:
+            continue  # Ready or Failed — nothing to do
         wallet = bot["owner"]
         existing = db.get_instance_by_wallet(wallet)
         if existing and existing["status"] in ("provisioning", "running"):
@@ -46,12 +48,13 @@ def watcher_tick(cfg: Config, db: DB, gcp, chain: ChainBackend):
             log.info(f"At capacity ({active_count}/{cfg.max_instances}), skipping {wallet}")
             continue
 
-        try:
-            chain.lock_for_provisioning(wallet)
-            log.info(f"Locked funds for provisioning: {wallet}")
-        except Exception as e:
-            log.error(f"Failed to lock funds for {wallet}: {e}")
-            continue
+        if ps == 0:
+            try:
+                chain.lock_for_provisioning(wallet)
+                log.info(f"Locked funds for provisioning: {wallet}")
+            except Exception as e:
+                log.error(f"Failed to lock funds for {wallet}: {e}")
+                continue
 
         alloc = db.allocate_bot(wallet)
         if alloc is None:

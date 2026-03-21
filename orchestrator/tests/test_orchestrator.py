@@ -117,10 +117,10 @@ def test_already_provisioning_skipped(tmp_path):
     assert len(instances) == 1
 
 
-def test_locked_status_skipped(tmp_path):
-    """Bots with provisioning_status != 0 are skipped."""
+def test_ready_status_skipped(tmp_path):
+    """Bots with provisioning_status >= 2 (Ready/Failed) are skipped."""
     db, chain, cfg, _ = _setup(tmp_path, [
-        {"owner": "WalletA", "bot_handle": "", "is_active": True, "provisioning_status": 1,
+        {"owner": "WalletA", "bot_handle": "", "is_active": True, "provisioning_status": 2,
          "available_balance": 100_000_000},
     ])
 

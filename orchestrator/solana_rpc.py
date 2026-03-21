@@ -101,7 +101,7 @@ def fetch_operator_config(client: Client) -> dict:
 
 def fetch_all_user_bots(client: Client) -> list[dict]:
     """Fetch all UserBot accounts with their lamport balances."""
-    filters = [MemcmpOpts(offset=0, bytes_=USER_BOT_DISC.hex())]
+    filters = [MemcmpOpts(offset=0, bytes=USER_BOT_DISC)]
     resp = client.get_program_accounts(get_program_id(), filters=filters)
     if not resp.value:
         return []

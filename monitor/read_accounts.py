@@ -167,7 +167,7 @@ def print_user_bot(client: Client, pda: Pubkey, label: str = ""):
 
 
 def print_all_user_bots(client: Client):
-    filters = [MemcmpOpts(offset=0, bytes_=USER_BOT_DISC.hex())]
+    filters = [MemcmpOpts(offset=0, bytes=USER_BOT_DISC.hex())]
     resp = client.get_program_accounts(PROGRAM_ID, filters=filters)
 
     accounts = resp.value
