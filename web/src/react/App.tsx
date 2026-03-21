@@ -1,3 +1,8 @@
+import { Buffer } from "buffer";
+if (typeof window !== "undefined" && !window.Buffer) {
+  window.Buffer = Buffer;
+}
+
 import { useMemo } from "react";
 import {
   ConnectionProvider,
