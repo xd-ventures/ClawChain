@@ -126,9 +126,12 @@ def watcher_tick(cfg: Config, db: DB, gcp, chain: ChainBackend):
             db.create_instance(wallet, tg_id, tg_name, vm_name, cfg.gcp_zone)
 
     # --- TEARDOWN DEACTIVATED BOTS ---
+    # Re-fetch on-chain state to avoid acting on stale data from before lock/provision
+    fresh_bots = chain.fetch_all_user_bots()
+    fresh_chain = {b["owner"]: b for b in fresh_bots}
     for inst in db.get_active_instances():
         wallet = inst["wallet_pubkey"]
-        chain_bot = on_chain.get(wallet)
+        chain_bot = fresh_chain.get(wallet)
         if chain_bot and not chain_bot["is_active"]:
             _teardown_instance(db, gcp, inst)
 
