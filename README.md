@@ -150,6 +150,7 @@ Background spanning Web3 infrastructure (validator operations), AI/ML platforms,
 
 - [xd.ventures](https://xd.ventures)
 - [GitHub](https://github.com/xd-ventures)
+- [Twitter/X](https://x.com/ClawChain_0x)
 
 ## License
 
