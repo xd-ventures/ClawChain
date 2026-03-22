@@ -161,6 +161,28 @@
       margin-top: 1em;
     }
     .reveal .closing-links a { color: var(--color-cyan); }
+    .reveal .comp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.7em;
+      margin-top: 0.5em;
+    }
+    .reveal .comp-table th {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      text-align: left;
+      padding: 0.4em 0.6em;
+      border-bottom: 1px solid rgba(0,240,255,0.3);
+    }
+    .reveal .comp-table td {
+      padding: 0.5em 0.6em;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      vertical-align: top;
+      line-height: 1.4;
+    }
+    .reveal .comp-table tr:last-child td { border-bottom: none; }
     .reveal .separator {
       border: none;
       height: 1px;
@@ -326,18 +348,51 @@
         </div>
       </section>
 
-      <!-- SLIDE 7: Closing -->
+      <!-- SLIDE 7: Closing + competitive landscape (vertical) -->
       <section>
-        <div class="center">
-          <h1>ClawChain</h1>
-          <p class="tagline" style="max-width:700px;margin:0.5em auto;">Cryptographic identity for AI agents.<br>Infrastructure to run them.<br><span class="neon-yellow">Solana to pay for them.</span></p>
-          <hr class="separator">
-          <div class="closing-links">
-            <p><a href="https://clawchain.xd.ventures">clawchain.xd.ventures</a></p>
-            <p><a href="https://x.com/ClawChain_0x">@ClawChain_0x</a></p>
-            <p><a href="https://github.com/xd-ventures/ClawChain">github.com/xd-ventures/ClawChain</a></p>
+        <section>
+          <div class="center">
+            <h1>ClawChain</h1>
+            <p class="tagline" style="max-width:700px;margin:0.5em auto;">Cryptographic identity for AI agents.<br>Infrastructure to run them.<br><span class="neon-yellow">Solana to pay for them.</span></p>
+            <hr class="separator">
+            <div class="closing-links">
+              <p><a href="https://clawchain.xd.ventures">clawchain.xd.ventures</a></p>
+              <p><a href="https://x.com/ClawChain_0x">@ClawChain_0x</a></p>
+              <p><a href="https://github.com/xd-ventures/ClawChain">github.com/xd-ventures/ClawChain</a></p>
+            </div>
           </div>
-        </div>
+        </section>
+
+        <section>
+          <h2>Competitive Landscape</h2>
+          <table class="comp-table">
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>What it does</th>
+                <th>Overlap</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="neon-cyan">clawchain.ai</td>
+                <td>"Reddit for AI agents" &mdash; social network on Chromia. 1,700+ agents.</td>
+                <td><span class="neon-yellow">Name only.</span> Social layer, not infra. Different chain.</td>
+              </tr>
+              <tr>
+                <td class="neon-cyan">clawchain.app</td>
+                <td>Art experiment &mdash; AI writes its own blockchain live. TypeScript stream.</td>
+                <td><span class="neon-yellow">None.</span> Dead project, broken SSL, empty GitHub.</td>
+              </tr>
+              <tr>
+                <td class="neon-cyan">ClawRouter</td>
+                <td>LLM router for OpenClaw + USDC payments (Base &amp; Solana). 4,300+ stars.</td>
+                <td><span class="neon-yellow">Complementary.</span> They route, we host. Can integrate.</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="margin-top:0.7em;font-size:0.75em;"><span class="neon-cyan">Our position:</span> Identity + hosting + billing on Solana &mdash; <span class="neon-magenta">nobody else does this.</span><br>We own <span class="neon-yellow">clawchain.sol</span> (SNS) &mdash; cryptographic proof of name ownership on Solana.</p>
+        </section>
       </section>
 
     </div>
