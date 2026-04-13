@@ -17,8 +17,12 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           script: |
-            cd ~/clawchain
-            git pull origin main
+            if [ ! -d ~/clawchain/.git ]; then
+              rm -rf ~/clawchain
+              git clone https://github.com/xd-ventures/ClawChain ~/clawchain
+            else
+              cd ~/clawchain && git pull origin main
+            fi
             cd ~/sentinel
             docker compose restart vaultclaw-pitch
 
