@@ -1,0 +1,28 @@
+name: Deploy VaultClaw Pitch
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web/public/pitch-vaultclaw/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            cd ~/clawchain
+            git pull origin main
+            cd ~/sentinel
+            docker compose restart vaultclaw-pitch
+
+      - name: Health check
+        run: |
+          sleep 5
+          curl --fail --silent --max-time 15 https://vaultclaw.xd.ventures/ || echo "Warning: health check failed"
