@@ -316,19 +316,16 @@
         <div class="flow-step"><span class="num">4</span> Anyone can verify: exact binary, exact policy, hardware-rooted. No trust required.</div>
         <div class="flow-step"><span class="num">5</span> Agent signs Solana txs inside enclave. DRAM bus-probing by the cloud host returns only ciphertext.</div>
 
-        <p style="font-size:0.68em; margin-top:0.55em; color:var(--color-muted);">
-          <span class="neon-cyan">Architectural note:</span> critical path (key generation, tx signing) runs in SGX enclave.
-          LLM inference for larger models runs on AMD SEV / Intel TDX (full VM encryption) &mdash; same security model, no EPC size constraints.
+        <p style="font-size:0.66em; margin-top:0.35em; color:var(--color-muted);">
+          <span class="neon-cyan">Note:</span> key ops in SGX enclave; LLM inference on AMD SEV / Intel TDX &mdash; same trust model, no EPC size limit.
         </p>
 
-        <div style="margin-top:0.4em;">
+        <div style="margin-top:0.3em;">
           <span class="badge">Solana-native</span>
           <span class="badge">SGX DCAP / TDX</span>
           <span class="badge badge-magenta">Seeker TEEPIN</span>
           <span class="badge badge-yellow">On-chain attestation</span>
         </div>
-
-        <p class="muted" style="margin-top:0.4em;">Building on <a href="https://github.com/xd-ventures/ClawChain" style="color:var(--color-cyan);">ClawChain</a> &mdash; proven Anchor program, orchestrator, escrow-like provisioning guarantees.</p>
       </section>
 
       <!-- SLIDE 5: Why Solana Seeker -->
@@ -356,10 +353,9 @@
           </div>
         </div>
 
-        <hr class="separator">
-        <p style="font-size:0.73em;">
-          <span class="neon-cyan">VaultClaw vision:</span> Seeker user's agent key lives in Seed Vault, attested by TEEPIN guardians, billing settled on-chain.
-          For non-Seeker users: cloud SGX/TDX provides equivalent cryptographic guarantees.
+        <p style="font-size:0.7em; margin-top:0.4em; border-left:3px solid var(--color-cyan); padding-left:0.7em;">
+          <span class="neon-cyan">VaultClaw:</span> agent key in Seed Vault, attested by TEEPIN, billing on-chain.
+          Non-Seeker users: cloud SGX/TDX, same cryptographic guarantees.
           <span class="neon-yellow">Same model. Different hardware. No single point of trust.</span>
         </p>
       </section>
