@@ -46,11 +46,11 @@
     .reveal .tagline { font-size: 1.05em; color: var(--color-white); font-weight: 500; margin: 0.4em 0; }
     .reveal .big-question {
       font-family: 'Orbitron', sans-serif;
-      font-size: 1.75em;
+      font-size: 1.6em;
       color: var(--color-magenta);
       text-shadow: var(--glow-magenta);
       text-align: center;
-      margin: 0.6em 0;
+      margin: 0.35em 0;
     }
     .reveal .badge {
       display: inline-block;
@@ -170,7 +170,7 @@
       border: none;
       height: 1px;
       background: linear-gradient(90deg, var(--color-cyan), var(--color-magenta));
-      margin: 0.8em 0;
+      margin: 0.4em 0;
     }
     .reveal .arch-box {
       display: flex;
@@ -179,7 +179,7 @@
     }
     .reveal .arch-layer {
       flex: 1;
-      padding: 0.5em 0.7em;
+      padding: 0.3em 0.5em;
       border-radius: 4px;
       text-align: center;
     }
@@ -199,7 +199,7 @@
       font-family: 'Orbitron', sans-serif;
       font-size: 0.65em;
       text-transform: uppercase;
-      margin-bottom: 0.4em;
+      margin-bottom: 0.2em;
     }
     .reveal .arch-layer li { font-size: 0.65em; }
     .reveal .quote-block {
@@ -274,7 +274,7 @@
         <h2>The Insight: Hardware Can Prove Code</h2>
         <p>Modern CPUs ship with <span class="neon-cyan">Trusted Execution Environments</span> that generate a cryptographic receipt of what software is running &mdash; unforgeable, hardware-rooted, independently verifiable.</p>
 
-        <div class="arch-box" style="margin-top:0.7em;">
+        <div class="arch-box" style="margin-top:0.3em;">
           <div class="arch-layer hardware">
             <div class="arch-layer-title" style="color:var(--color-yellow);">Hardware Layer</div>
             <ul>
@@ -301,7 +301,7 @@
           </div>
         </div>
 
-        <div class="quote-block" style="margin-top:0.6em;">
+        <div class="quote-block" style="margin-top:0.3em;">
           The SGX attestation quote carries a 256-bit <span class="neon-cyan">user_data</span> field.
           VaultClaw puts the agent's Solana public key there &mdash; signed by the CPU.<br>
           <span class="neon-yellow">Cryptographic proof: this keypair was generated inside this exact code, on genuine Intel hardware.</span><br>
@@ -339,7 +339,7 @@
       <section>
         <h2>Solana Seeker: Mobile TEE Meets Blockchain</h2>
 
-        <div style="display:flex; gap:1.5em; margin-top:0.5em;">
+        <div style="display:flex; gap:1em; margin-top:0.3em;">
           <div style="flex:1;">
             <h3>Seed Vault Hardware</h3>
             <ul>
