@@ -32,11 +32,11 @@
       letter-spacing: 0.06em;
     }
     .reveal h1 { color: var(--color-cyan); text-shadow: var(--glow-cyan); font-size: 2.4em; }
-    .reveal h2 { color: var(--color-cyan); text-shadow: var(--glow-cyan); font-size: 1.4em; margin-bottom: 0.4em; }
-    .reveal h3 { color: var(--color-magenta); font-size: 0.95em; margin-top: 0.5em; }
-    .reveal p, .reveal li { font-size: 0.78em; line-height: 1.5; }
+    .reveal h2 { color: var(--color-cyan); text-shadow: var(--glow-cyan); font-size: 1.4em; margin-bottom: 0.25em; margin-top: 0; }
+    .reveal h3 { color: var(--color-magenta); font-size: 0.9em; margin-top: 0.35em; margin-bottom: 0.1em; }
+    .reveal p, .reveal li { font-size: 0.78em; line-height: 1.4; }
     .reveal ul { list-style: none; padding: 0; }
-    .reveal li { padding-left: 1.2em; position: relative; margin-bottom: 0.4em; }
+    .reveal li { padding-left: 1.2em; position: relative; margin-bottom: 0.25em; }
     .reveal li::before { content: '▸'; position: absolute; left: 0; color: var(--color-cyan); }
     .reveal code, .reveal .mono { font-family: 'Share Tech Mono', monospace; }
     .reveal .neon-cyan { color: var(--color-cyan); text-shadow: var(--glow-cyan); }
@@ -72,8 +72,8 @@
     }
     .reveal .flow-step {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 0.75em;
-      padding: 0.28em 0;
+      font-size: 0.74em;
+      padding: 0.18em 0;
       color: var(--color-white);
     }
     .reveal .flow-step .num {
@@ -84,7 +84,7 @@
     .reveal .stat-row {
       display: flex;
       gap: 1.5em;
-      margin: 0.6em 0;
+      margin: 0.35em 0;
       flex-wrap: wrap;
     }
     .reveal .stat { text-align: center; }
@@ -102,28 +102,28 @@
     }
     .reveal .timeline {
       display: flex;
-      gap: 1em;
-      margin: 0.8em 0;
+      gap: 0.8em;
+      margin: 0.5em 0;
     }
     .reveal .timeline-col {
       flex: 1;
-      padding: 0.6em;
+      padding: 0.45em 0.6em;
       border: 1px solid rgba(0,240,255,0.2);
       border-radius: 4px;
       background: rgba(0,240,255,0.03);
     }
-    .reveal .timeline-col h3 { margin-top: 0; font-size: 0.9em; }
-    .reveal .timeline-col li { font-size: 0.7em; }
+    .reveal .timeline-col h3 { margin-top: 0; font-size: 0.85em; }
+    .reveal .timeline-col li { font-size: 0.68em; }
     .reveal .center { text-align: center; }
     .reveal .pillars {
       display: flex;
-      gap: 1em;
-      margin: 0.6em 0;
+      gap: 0.8em;
+      margin: 0.35em 0;
     }
     .reveal .pillar {
       flex: 1;
       text-align: center;
-      padding: 0.5em;
+      padding: 0.35em;
       border: 1px solid rgba(255,45,111,0.3);
       border-radius: 4px;
     }
@@ -160,10 +160,10 @@
       border-bottom: 1px solid rgba(0,240,255,0.3);
     }
     .reveal .comp-table td {
-      padding: 0.45em 0.6em;
+      padding: 0.3em 0.5em;
       border-bottom: 1px solid rgba(255,255,255,0.07);
       vertical-align: top;
-      line-height: 1.4;
+      line-height: 1.3;
     }
     .reveal .comp-table tr:last-child td { border-bottom: none; }
     .reveal .separator {
@@ -204,23 +204,23 @@
     .reveal .arch-layer li { font-size: 0.65em; }
     .reveal .quote-block {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 0.68em;
-      padding: 0.6em 1em;
+      font-size: 0.66em;
+      padding: 0.4em 0.8em;
       border-left: 3px solid var(--color-cyan);
       background: rgba(0,240,255,0.04);
       color: var(--color-white);
-      margin: 0.6em 0;
-      line-height: 1.6;
+      margin: 0.4em 0;
+      line-height: 1.55;
     }
     .reveal .schneier-block {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 0.68em;
-      padding: 0.65em 1em;
+      font-size: 0.66em;
+      padding: 0.4em 0.8em;
       border-left: 3px solid var(--color-magenta);
       background: rgba(255,45,111,0.04);
       color: var(--color-white);
-      margin: 0.7em 0;
-      line-height: 1.65;
+      margin: 0.4em 0;
+      line-height: 1.55;
     }
     .reveal .schneier-block .attribution {
       color: var(--color-muted);
