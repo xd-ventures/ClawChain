@@ -279,7 +279,6 @@
             <div class="arch-layer-title" style="color:var(--color-yellow);">Hardware Layer</div>
             <ul>
               <li>Intel SGX enclaves</li>
-              <li>ARM TrustZone</li>
               <li>Seeker Seed Vault</li>
             </ul>
           </div>
@@ -288,24 +287,21 @@
             <ul>
               <li>Remote quote (DCAP)</li>
               <li>MRENCLAVE code hash</li>
-              <li>TEEPIN Guardian nodes</li>
             </ul>
           </div>
           <div class="arch-layer application">
             <div class="arch-layer-title" style="color:var(--color-magenta);">Agent Identity</div>
             <ul>
               <li>Keys never leave enclave</li>
-              <li>Policy enforced by hardware</li>
               <li>Pubkey bound on-chain</li>
             </ul>
           </div>
         </div>
 
         <div class="quote-block" style="margin-top:0.3em;">
-          The SGX attestation quote carries a 256-bit <span class="neon-cyan">user_data</span> field.
-          VaultClaw puts the agent's Solana public key there &mdash; signed by the CPU.<br>
-          <span class="neon-yellow">Cryptographic proof: this keypair was generated inside this exact code, on genuine Intel hardware.</span><br>
-          One byte change in agent code &rarr; completely different MRENCLAVE &rarr; on-chain mismatch detected instantly.
+          SGX attestation quote carries a 256-bit <span class="neon-cyan">user_data</span> field &mdash;
+          VaultClaw puts the agent's Solana pubkey there, signed by the CPU itself.<br>
+          <span class="neon-yellow">Any code change &rarr; different MRENCLAVE &rarr; on-chain mismatch detected instantly.</span>
         </div>
       </section>
 
